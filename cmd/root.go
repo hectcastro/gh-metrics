@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	VERSION             = "0.1.0"
+	VERSION             = "0.2.1"
 	DEFAULT_DAYS_BACK   = 10
 	DEFAULT_DATE_FORMAT = "2006-01-02"
 )
