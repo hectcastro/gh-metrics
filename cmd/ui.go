@@ -12,7 +12,9 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
-const DEFAULT_EMPTY_CELL = "--"
+const (
+	DefaultEmptyCell = "--"
+)
 
 type Participants struct {
 	TotalCount int
@@ -66,7 +68,7 @@ type MetricsGQLQuery struct {
 
 func getTimeToFirstReview(prCreatedAtString string, reviews Reviews) string {
 	if len(reviews.Nodes) == 0 {
-		return DEFAULT_EMPTY_CELL
+		return DefaultEmptyCell
 	}
 
 	firstReviewedAt, _ := time.Parse(time.RFC3339, reviews.Nodes[0].CreatedAt)
@@ -77,7 +79,7 @@ func getTimeToFirstReview(prCreatedAtString string, reviews Reviews) string {
 
 func getFeatureLeadTime(prMergedAtString string, commits Commits) string {
 	if len(commits.Nodes) == 0 {
-		return DEFAULT_EMPTY_CELL
+		return DefaultEmptyCell
 	}
 
 	prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
@@ -88,7 +90,7 @@ func getFeatureLeadTime(prMergedAtString string, commits Commits) string {
 
 func getLastReviewToMerge(prMergedAtString string, latestReviews LatestReviews) string {
 	if len(latestReviews.Nodes) == 0 {
-		return DEFAULT_EMPTY_CELL
+		return DefaultEmptyCell
 	}
 
 	prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
