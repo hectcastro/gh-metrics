@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	gh "github.com/cli/go-gh"
@@ -57,7 +56,7 @@ func getLastReviewToMerge(prMergedAtString string, latestReviews LatestReviews) 
 	return prMergedAt.Sub(latestReviewedAt).Round(time.Minute).String()
 }
 
-func (ui *UI) PrintMetrics() {
+func (ui *UI) PrintMetrics() string {
 	client, err := gh.GQLClient(
 		&api.ClientOptions{
 			EnableCache: true,
@@ -80,7 +79,6 @@ func (ui *UI) PrintMetrics() {
 	}
 
 	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
 	t.SetStyle(table.StyleLight)
 
 	t.AppendHeader(table.Row{
@@ -120,9 +118,9 @@ func (ui *UI) PrintMetrics() {
 		})
 	}
 
-	if csvFormat {
-		t.RenderCSV()
-	} else {
-		t.Render()
+	if ui.CSVFormat {
+		return t.RenderCSV()
 	}
+
+	return t.Render()
 }
