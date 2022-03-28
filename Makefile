@@ -7,9 +7,7 @@ test: fmtcheck
 	go list $(TEST) | xargs -t -n4 go test $(TESTARGS) -v -timeout=2m -parallel=4
 
 cover:
-	go test $(TEST) -coverprofile=coverage.out
-	go tool cover -html=coverage.out
-	rm coverage.out
+	go test $(TEST) -race -coverprofile=coverage.out -covermode=atomic
 
 fmt:
 	gofmt -w $(GOFMT_FILES)
@@ -19,4 +17,4 @@ fmtcheck:
 
 .NOTPARALLEL:
 
-.PHONY: cover default fmt fmtcheck test testrace 
+.PHONY: cover default fmt fmtcheck test

@@ -22,6 +22,11 @@ jobs:
           restore-keys: go-
 
       - run: make fmtcheck
-      - run: make test
+      - run: make cover
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
