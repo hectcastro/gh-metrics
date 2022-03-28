@@ -65,7 +65,7 @@ func (ui *UI) PrintMetrics() string {
 		},
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("To authenticate, please run `gh auth login`.")
 	}
 
 	variables := map[string]interface{}{
