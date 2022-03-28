@@ -2,9 +2,14 @@ module github.com/hectcastro/gh-metrics
 
 go 1.18
 
-require github.com/cli/go-gh v0.0.3
+require (
+	github.com/cli/go-gh v0.0.3
+	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32
+	gopkg.in/h2non/gock.v1 v1.1.2
+)
 
 require (
+	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
