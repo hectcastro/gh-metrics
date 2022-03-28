@@ -19,9 +19,9 @@ var rootCmd = &cobra.Command{
 	Short: "gh-metrics: provide summary pull request metrics",
 	Run: func(cmd *cobra.Command, args []string) {
 		owner, _ := cmd.Flags().GetString("owner")
-		repo, _ := cmd.Flags().GetString("repo")
-		start, _ := cmd.Flags().GetString("start")
-		end, _ := cmd.Flags().GetString("end")
+		repository, _ := cmd.Flags().GetString("repo")
+		startDate, _ := cmd.Flags().GetString("start")
+		endDate, _ := cmd.Flags().GetString("end")
 		csv, _ := cmd.Flags().GetBool("csv")
 
 		version, _ := cmd.Flags().GetBool("version")
@@ -30,7 +30,15 @@ var rootCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		printMetrics(owner, repo, start, end, csv)
+		ui := &UI{
+			Owner:      owner,
+			Repository: repository,
+			StartDate:  startDate,
+			EndDate:    endDate,
+			CSVFormat:  csv,
+		}
+
+		fmt.Println(ui.PrintMetrics())
 	},
 }
 

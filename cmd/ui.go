@@ -16,54 +16,12 @@ const (
 	DefaultEmptyCell = "--"
 )
 
-type Participants struct {
-	TotalCount int
-}
-
-type Comments struct {
-	TotalCount int
-}
-
-type Reviews struct {
-	Nodes []struct {
-		CreatedAt string
-	}
-}
-
-type Commits struct {
-	TotalCount int
-	Nodes      []struct {
-		Commit struct {
-			CommittedDate string
-		}
-	}
-}
-
-type LatestReviews struct {
-	Nodes []struct {
-		CreatedAt string
-	}
-}
-
-type MetricsGQLQuery struct {
-	Search struct {
-		Nodes []struct {
-			PullRequest struct {
-				Additions     int
-				Deletions     int
-				Title         string
-				Number        int
-				CreatedAt     string
-				ChangedFiles  int
-				MergedAt      string
-				Participants  Participants
-				Comments      Comments
-				Reviews       Reviews       `graphql:"reviews(first: 1)"`
-				LatestReviews LatestReviews `graphql:"latestReviews(first: 1)"`
-				Commits       Commits       `graphql:"commits(first: 1)"`
-			} `graphql:"... on PullRequest"`
-		}
-	} `graphql:"search(query: $query, type: ISSUE, last: 50)"`
+type UI struct {
+	Owner      string
+	Repository string
+	StartDate  string
+	EndDate    string
+	CSVFormat  bool
 }
 
 func getTimeToFirstReview(prCreatedAtString string, reviews Reviews) string {
@@ -99,21 +57,20 @@ func getLastReviewToMerge(prMergedAtString string, latestReviews LatestReviews) 
 	return prMergedAt.Sub(latestReviewedAt).Round(time.Minute).String()
 }
 
-func printMetrics(owner string, repo string, start string, end string, csvFormat bool) {
-	options := api.ClientOptions{
-		EnableCache: true,
-		CacheTTL:    15 * time.Minute,
-		Timeout:     5 * time.Second,
-	}
-
-	client, err := gh.GQLClient(&options)
+func (ui *UI) PrintMetrics() {
+	client, err := gh.GQLClient(
+		&api.ClientOptions{
+			EnableCache: true,
+			CacheTTL:    15 * time.Minute,
+			Timeout:     5 * time.Second,
+		},
+	)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	variables := map[string]interface{}{
-		"query": graphql.String(fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s", owner, repo, start, end)),
+		"query": graphql.String(fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s", ui.Owner, ui.Repository, ui.StartDate, ui.EndDate)),
 	}
 
 	var gqlQuery MetricsGQLQuery
