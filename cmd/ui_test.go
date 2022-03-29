@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/nbio/st"
@@ -16,6 +17,54 @@ const (
 	Repository = "testRepo"
 	StartDate  = "2022-03-18"
 	EndDate    = "2022-03-28"
+
+	ResponseJSON = `
+{
+    "data": {
+        "search": {
+            "nodes": [
+                {
+                    "additions": 6,
+                    "deletions": 3,
+                    "number": 5339,
+                    "createdAt": "2022-03-21T15:11:09Z",
+                    "changedFiles": 1,
+                    "mergedAt": "2022-03-21T16:22:05Z",
+                    "participants": {
+                        "totalCount": 3
+                    },
+                    "comments": {
+                        "totalCount": 0
+                    },
+                    "reviews": {
+                        "nodes": [
+                            {
+                                "createdAt": "2022-03-21T15:12:52Z"
+                            }
+                        ]
+                    },
+                    "latestReviews": {
+                        "nodes": [
+                            {
+                                "createdAt": "2022-03-21T15:12:52Z"
+                            }
+                        ]
+                    },
+                    "commits": {
+                        "totalCount": 4,
+                        "nodes": [
+                            {
+                                "commit": {
+                                    "committedDate": "2022-03-21T15:09:52Z"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}`
 )
 
 type GQLRequest struct {
@@ -41,15 +90,17 @@ func Test_SearchQuery(t *testing.T) {
 		MatchType("json").
 		AddMatcher(gqlSearchQueryMatcher).
 		Reply(200).
-		JSON(map[string]string{})
+		BodyString(ResponseJSON)
 
 	ui := &UI{
 		Owner:      Owner,
 		Repository: Repository,
 		StartDate:  StartDate,
 		EndDate:    EndDate,
+		CSVFormat:  false,
 	}
-	ui.PrintMetrics()
+
+	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339"), true)
 }
 
 func Test_getTimeToFirstReview(t *testing.T) {
