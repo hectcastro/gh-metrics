@@ -43,7 +43,6 @@ type MetricsGQLQuery struct {
 			PullRequest struct {
 				Additions     int
 				Deletions     int
-				Title         string
 				Number        int
 				CreatedAt     string
 				ChangedFiles  int
