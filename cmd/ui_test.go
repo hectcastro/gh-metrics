@@ -103,6 +103,27 @@ func Test_SearchQuery(t *testing.T) {
 	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339"), true)
 }
 
+func Test_SearchQuery_WithCSV(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("https://api.github.com/graphql").
+		Post("/").
+		MatchType("json").
+		AddMatcher(gqlSearchQueryMatcher).
+		Reply(200).
+		BodyString(ResponseJSON)
+
+	ui := &UI{
+		Owner:      Owner,
+		Repository: Repository,
+		StartDate:  StartDate,
+		EndDate:    EndDate,
+		CSVFormat:  true,
+	}
+
+	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339,4,6,3,1,2m0s,0,3,1h12m0s,1h9m0s"), true)
+}
+
 func Test_getTimeToFirstReview(t *testing.T) {
 	var reviews = Reviews{
 		Nodes: ReviewNodes{
