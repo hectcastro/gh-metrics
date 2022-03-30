@@ -14,7 +14,7 @@ const (
 	DefaultDateFormat = "2006-01-02"
 )
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "gh-metrics",
 	Short: "gh-metrics: provide summary pull request metrics",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -43,21 +43,21 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
+	cobra.CheckErr(RootCmd.Execute())
 }
 
 func init() {
-	rootCmd.Flags().StringP("owner", "o", "", "target repository owner")
-	rootCmd.MarkFlagRequired("owner")
-	rootCmd.Flags().StringP("repo", "r", "", "target repository name")
-	rootCmd.MarkFlagRequired("repo")
+	RootCmd.Flags().StringP("owner", "o", "", "target repository owner")
+	RootCmd.MarkFlagRequired("owner")
+	RootCmd.Flags().StringP("repo", "r", "", "target repository name")
+	RootCmd.MarkFlagRequired("repo")
 
 	today := time.Now().UTC()
 	start := today.AddDate(0, 0, -DefaultDaysBack)
 
-	rootCmd.Flags().StringP("start", "s", start.Format(DefaultDateFormat), "target start of date range")
-	rootCmd.Flags().StringP("end", "e", today.Format(DefaultDateFormat), "target end of date range")
+	RootCmd.Flags().StringP("start", "s", start.Format(DefaultDateFormat), "target start of date range")
+	RootCmd.Flags().StringP("end", "e", today.Format(DefaultDateFormat), "target end of date range")
 
-	rootCmd.Flags().BoolP("csv", "c", false, "print output as CSV")
-	rootCmd.Flags().BoolP("version", "v", false, "print current version")
+	RootCmd.Flags().BoolP("csv", "c", false, "print output as CSV")
+	RootCmd.Flags().BoolP("version", "v", false, "print current version")
 }
