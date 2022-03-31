@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/nbio/st"
+	"github.com/rickar/cal/v2"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -98,6 +100,7 @@ func Test_SearchQuery(t *testing.T) {
 		StartDate:  StartDate,
 		EndDate:    EndDate,
 		CSVFormat:  false,
+		Calendar:   cal.NewBusinessCalendar(),
 	}
 
 	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339"), true)
@@ -119,9 +122,45 @@ func Test_SearchQuery_WithCSV(t *testing.T) {
 		StartDate:  StartDate,
 		EndDate:    EndDate,
 		CSVFormat:  true,
+		Calendar:   cal.NewBusinessCalendar(),
 	}
 
-	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339,4,6,3,1,2m0s,0,3,1h12m0s,1h9m0s"), true)
+	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339,4,6,3,1,2m,0,3,1h12m,1h9m"), true)
+}
+
+func Test_subtractTime_WithinWorkday(t *testing.T) {
+	start := time.Date(2022, time.Month(3), 21, 15, 11, 9, 0, time.UTC)
+	end := time.Date(2022, time.Month(3), 21, 15, 12, 52, 0, time.UTC)
+
+	ui := &UI{
+		Calendar: cal.NewBusinessCalendar(),
+	}
+
+	st.Assert(t, ui.subtractTime(end, start).String(), "1m43s")
+	st.Assert(t, ui.subtractTime(end, start).String(), "1m43s")
+}
+
+func Test_subtractTime_SpanningWeekend(t *testing.T) {
+	start := time.Date(2022, time.Month(3), 25, 17, 0, 0, 0, time.UTC)
+	end := time.Date(2022, time.Month(3), 28, 0, 0, 0, 0, time.UTC)
+
+	uiWithWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayAllDays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+	st.Assert(t, uiWithWeekends.subtractTime(end, start).String(), "54h59m57s")
+
+	uiWithoutWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayOnlyWeekdays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+	st.Assert(t, uiWithoutWeekends.subtractTime(end, start).String(), "6h59m59s")
 }
 
 func Test_getTimeToFirstReview(t *testing.T) {
@@ -131,7 +170,23 @@ func Test_getTimeToFirstReview(t *testing.T) {
 		},
 	}
 
-	st.Assert(t, getTimeToFirstReview("2022-03-21T15:11:09Z", reviews), "24h0m0s")
+	uiWithWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayAllDays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+	st.Assert(t, uiWithWeekends.getTimeToFirstReview("2022-03-21T15:11:09Z", reviews), "24h0m")
+
+	uiWithoutWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayOnlyWeekdays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+	st.Assert(t, uiWithoutWeekends.getTimeToFirstReview("2022-03-21T15:11:09Z", reviews), "24h0m")
 }
 
 func Test_getTimeToFirstReview_NoReviews(t *testing.T) {
@@ -139,7 +194,8 @@ func Test_getTimeToFirstReview_NoReviews(t *testing.T) {
 		Nodes: ReviewNodes{},
 	}
 
-	st.Assert(t, getTimeToFirstReview("2022-03-21T15:11:09Z", reviews), "--")
+	ui := &UI{}
+	st.Assert(t, ui.getTimeToFirstReview("2022-03-21T15:11:09Z", reviews), "--")
 }
 
 func Test_getFeatureLeadTime(t *testing.T) {
@@ -150,7 +206,23 @@ func Test_getFeatureLeadTime(t *testing.T) {
 		},
 	}
 
-	st.Assert(t, getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "24h0m0s")
+	uiWithWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayAllDays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+	st.Assert(t, uiWithWeekends.getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "24h0m")
+
+	uiWithoutWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayOnlyWeekdays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+	st.Assert(t, uiWithoutWeekends.getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "15h11m")
 }
 
 func Test_getFeatureLeadTime_NoCommits(t *testing.T) {
@@ -159,7 +231,8 @@ func Test_getFeatureLeadTime_NoCommits(t *testing.T) {
 		Nodes:      CommitNodes{},
 	}
 
-	st.Assert(t, getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "--")
+	ui := &UI{}
+	st.Assert(t, ui.getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "--")
 }
 
 func Test_getLastReviewToMerge(t *testing.T) {
@@ -169,7 +242,23 @@ func Test_getLastReviewToMerge(t *testing.T) {
 		},
 	}
 
-	st.Assert(t, getLastReviewToMerge("2022-03-21T15:11:09Z", latestReviews), "24h0m0s")
+	uiWithWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayAllDays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+	st.Assert(t, uiWithWeekends.getLastReviewToMerge("2022-03-21T15:11:09Z", latestReviews), "24h0m")
+
+	uiWithoutWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayOnlyWeekdays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+	st.Assert(t, uiWithoutWeekends.getLastReviewToMerge("2022-03-21T15:11:09Z", latestReviews), "15h11m")
 }
 
 func Test_getLastReviewToMerge_NoReviews(t *testing.T) {
@@ -177,5 +266,6 @@ func Test_getLastReviewToMerge_NoReviews(t *testing.T) {
 		Nodes: LatestReviewNodes{},
 	}
 
-	st.Assert(t, getLastReviewToMerge("2022-03-21T15:11:09Z", latestReviews), "--")
+	ui := &UI{}
+	st.Assert(t, ui.getLastReviewToMerge("2022-03-21T15:11:09Z", latestReviews), "--")
 }
