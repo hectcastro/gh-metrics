@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/rickar/cal/v2"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +15,24 @@ const (
 	DefaultDateFormat = "2006-01-02"
 )
 
+func WorkdayOnlyWeekdays(day time.Time) bool {
+	return day.Weekday() != time.Saturday && day.Weekday() != time.Sunday
+}
+
+func WorkdayAllDays(day time.Time) bool {
+	return true
+}
+
+func WorkdayStart(d time.Time) time.Time {
+	year, month, day := d.Date()
+	return time.Date(year, month, day, 0, 0, 0, 0, d.Location())
+}
+
+func WorkdayEnd(d time.Time) time.Time {
+	year, month, day := d.Date()
+	return time.Date(year, month, day, 23, 59, 59, 0, d.Location())
+}
+
 var RootCmd = &cobra.Command{
 	Use:   "gh-metrics",
 	Short: "gh-metrics: provide summary pull request metrics",
@@ -22,7 +41,8 @@ var RootCmd = &cobra.Command{
 		repository, _ := cmd.Flags().GetString("repo")
 		startDate, _ := cmd.Flags().GetString("start")
 		endDate, _ := cmd.Flags().GetString("end")
-		csv, _ := cmd.Flags().GetBool("csv")
+		onlyWeekdays, _ := cmd.Flags().GetBool("only-weekdays")
+		csvFormat, _ := cmd.Flags().GetBool("csv")
 
 		version, _ := cmd.Flags().GetBool("version")
 		if version {
@@ -30,12 +50,26 @@ var RootCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
+		var workdayFunc cal.WorkdayFn
+		if onlyWeekdays {
+			workdayFunc = WorkdayOnlyWeekdays
+		} else {
+			workdayFunc = WorkdayAllDays
+		}
+
+		calendar := &cal.BusinessCalendar{
+			WorkdayFunc:      workdayFunc,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		}
+
 		ui := &UI{
 			Owner:      owner,
 			Repository: repository,
 			StartDate:  startDate,
 			EndDate:    endDate,
-			CSVFormat:  csv,
+			CSVFormat:  csvFormat,
+			Calendar:   calendar,
 		}
 
 		fmt.Println(ui.PrintMetrics())
@@ -58,6 +92,7 @@ func init() {
 	RootCmd.Flags().StringP("start", "s", start.Format(DefaultDateFormat), "target start of date range")
 	RootCmd.Flags().StringP("end", "e", today.Format(DefaultDateFormat), "target end of date range")
 
+	RootCmd.Flags().BoolP("only-weekdays", "w", false, "only include weekdays (M-F) in date range calculations")
 	RootCmd.Flags().BoolP("csv", "c", false, "print output as CSV")
 	RootCmd.Flags().BoolP("version", "v", false, "print current version")
 }

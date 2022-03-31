@@ -3,12 +3,14 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	gh "github.com/cli/go-gh"
 	"github.com/cli/go-gh/pkg/api"
 	graphql "github.com/cli/shurcooL-graphql"
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/rickar/cal/v2"
 )
 
 const (
@@ -21,9 +23,18 @@ type UI struct {
 	StartDate  string
 	EndDate    string
 	CSVFormat  bool
+	Calendar   *cal.BusinessCalendar
 }
 
-func getTimeToFirstReview(prCreatedAtString string, reviews Reviews) string {
+func (ui *UI) subtractTime(t1, t2 time.Time) time.Duration {
+	return ui.Calendar.WorkHoursInRange(t1, t2)
+}
+
+func formatDuration(duration time.Duration) string {
+	return strings.TrimSuffix((duration).Round(time.Minute).String(), "0s")
+}
+
+func (ui *UI) getTimeToFirstReview(prCreatedAtString string, reviews Reviews) string {
 	if len(reviews.Nodes) == 0 {
 		return DefaultEmptyCell
 	}
@@ -31,10 +42,10 @@ func getTimeToFirstReview(prCreatedAtString string, reviews Reviews) string {
 	firstReviewedAt, _ := time.Parse(time.RFC3339, reviews.Nodes[0].CreatedAt)
 	prCreatedAt, _ := time.Parse(time.RFC3339, prCreatedAtString)
 
-	return firstReviewedAt.Sub(prCreatedAt).Round(time.Minute).String()
+	return formatDuration(ui.subtractTime(firstReviewedAt, prCreatedAt.UTC()))
 }
 
-func getFeatureLeadTime(prMergedAtString string, commits Commits) string {
+func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) string {
 	if len(commits.Nodes) == 0 {
 		return DefaultEmptyCell
 	}
@@ -42,10 +53,10 @@ func getFeatureLeadTime(prMergedAtString string, commits Commits) string {
 	prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
 	prFirstCommittedAt, _ := time.Parse(time.RFC3339, commits.Nodes[0].Commit.CommittedDate)
 
-	return prMergedAt.Sub(prFirstCommittedAt).Round(time.Minute).String()
+	return formatDuration(ui.subtractTime(prMergedAt, prFirstCommittedAt))
 }
 
-func getLastReviewToMerge(prMergedAtString string, latestReviews LatestReviews) string {
+func (ui *UI) getLastReviewToMerge(prMergedAtString string, latestReviews LatestReviews) string {
 	if len(latestReviews.Nodes) == 0 {
 		return DefaultEmptyCell
 	}
@@ -53,7 +64,7 @@ func getLastReviewToMerge(prMergedAtString string, latestReviews LatestReviews) 
 	prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
 	latestReviewedAt, _ := time.Parse(time.RFC3339, latestReviews.Nodes[0].CreatedAt)
 
-	return prMergedAt.Sub(latestReviewedAt).Round(time.Minute).String()
+	return formatDuration(ui.subtractTime(prMergedAt, latestReviewedAt))
 }
 
 func (ui *UI) PrintMetrics() string {
@@ -101,17 +112,17 @@ func (ui *UI) PrintMetrics() string {
 			node.PullRequest.Additions,
 			node.PullRequest.Deletions,
 			node.PullRequest.ChangedFiles,
-			getTimeToFirstReview(
+			ui.getTimeToFirstReview(
 				node.PullRequest.CreatedAt,
 				node.PullRequest.Reviews,
 			),
 			node.PullRequest.Comments.TotalCount,
 			node.PullRequest.Participants.TotalCount,
-			getFeatureLeadTime(
+			ui.getFeatureLeadTime(
 				node.PullRequest.MergedAt,
 				node.PullRequest.Commits,
 			),
-			getLastReviewToMerge(
+			ui.getLastReviewToMerge(
 				node.PullRequest.MergedAt,
 				node.PullRequest.LatestReviews,
 			),
