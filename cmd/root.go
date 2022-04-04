@@ -1,3 +1,5 @@
+// Package cmd implements a command line interface for summarizing
+// GitHub pull request metrics.
 package cmd
 
 import (
@@ -10,24 +12,36 @@ import (
 )
 
 const (
-	Version           = "0.2.1"
-	DefaultDaysBack   = 10
+	// Extension version. Displayed when `--version` flag is used.
+	Version = "0.2.1"
+	// Default number of days in the past to look for pull requests
+	// within a repository.
+	DefaultDaysBack = 10
+	// Default date format to use when displaying dates.
 	DefaultDateFormat = "2006-01-02"
 )
 
+// WorkdayOnlyWeekdays returns true if the given day is a weekday,
+// otherwise returns false.
 func WorkdayOnlyWeekdays(day time.Time) bool {
 	return day.Weekday() != time.Saturday && day.Weekday() != time.Sunday
 }
 
-func WorkdayAllDays(day time.Time) bool {
+// WorkdayAllDays returns true regardless of the given day, as currently
+// all days are considered workdays.
+func WorkdayAllDays(_ time.Time) bool {
 	return true
 }
 
+// WorkdayStart determines the beginning of a workday by returning the
+// same day, but at the first second.
 func WorkdayStart(d time.Time) time.Time {
 	year, month, day := d.Date()
 	return time.Date(year, month, day, 0, 0, 0, 0, d.Location())
 }
 
+// WorkdayEnd determines the end of a workday by returning the same day,
+// but at the last second.
 func WorkdayEnd(d time.Time) time.Time {
 	year, month, day := d.Date()
 	return time.Date(year, month, day, 23, 59, 59, 0, d.Location())

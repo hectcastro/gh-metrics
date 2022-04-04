@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	// Default representation of an empty table cell.
 	DefaultEmptyCell = "--"
 )
 
@@ -26,14 +27,23 @@ type UI struct {
 	Calendar   *cal.BusinessCalendar
 }
 
+// subtractTime returns the duration t1 - t2, with respect to the
+// configured calendar.
 func (ui *UI) subtractTime(t1, t2 time.Time) time.Duration {
 	return ui.Calendar.WorkHoursInRange(t1, t2)
 }
 
+// formatDuration formats a duration in hours and minutes, rounded
+// to the nearest minute.
 func formatDuration(duration time.Duration) string {
 	return strings.TrimSuffix((duration).Round(time.Minute).String(), "0s")
 }
 
+// getTimeToFirstReview returns the time to first review, in hours and
+// minutes, for a given PR.
+//
+//   firstReview = firstReviewAt - prCreatedAt
+//
 func (ui *UI) getTimeToFirstReview(prCreatedAtString string, reviews Reviews) string {
 	if len(reviews.Nodes) == 0 {
 		return DefaultEmptyCell
@@ -45,6 +55,11 @@ func (ui *UI) getTimeToFirstReview(prCreatedAtString string, reviews Reviews) st
 	return formatDuration(ui.subtractTime(firstReviewedAt, prCreatedAt.UTC()))
 }
 
+// getFeatureLeadTime returns the feature lead time, in hours and minutes,
+// for a given PR.
+//
+//   featureLeadTime = prMergedAt - firstCommitAt
+//
 func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) string {
 	if len(commits.Nodes) == 0 {
 		return DefaultEmptyCell
@@ -56,6 +71,11 @@ func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) strin
 	return formatDuration(ui.subtractTime(prMergedAt, prFirstCommittedAt))
 }
 
+// getLastReviewToMerge returns the last review to merge time, in hours and
+// minutes, for a given PR.
+//
+//   lastReviewToMerge = prMergedAt - lastReviewedAt
+//
 func (ui *UI) getLastReviewToMerge(prMergedAtString string, latestReviews LatestReviews) string {
 	if len(latestReviews.Nodes) == 0 {
 		return DefaultEmptyCell
@@ -67,6 +87,8 @@ func (ui *UI) getLastReviewToMerge(prMergedAtString string, latestReviews Latest
 	return formatDuration(ui.subtractTime(prMergedAt, latestReviewedAt))
 }
 
+// PrintMetrics returns a string representation of the metrics summary for
+// a set of pull requests determined by the supplied date range.
 func (ui *UI) PrintMetrics() string {
 	client, err := gh.GQLClient(
 		&api.ClientOptions{

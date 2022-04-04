@@ -2,6 +2,10 @@
 
 A [`gh`](https://cli.github.com/) extension that provides summary pull request metrics.
 
+- [Usage](#usage)
+- [Metric definitions](#metric-definitions)
+- [Influences](#influences)
+
 ## Usage
 
 To install the extension use:
@@ -58,3 +62,13 @@ PR,Commits,Additions,Deletions,Changed Files,Time to First Review,Comments,Parti
 5336,1,2,2,2,7m0s,0,1,2h30m0s,2h24m0s
 5327,1,1,1,1,41h57m0s,1,4,65h44m0s,14m0s
 ```
+
+## Metric definitions
+
+- **Time to first review**: The duration from when the pull request was created to when the first review against it was completed.
+- **Feature lead time**: The duration from when the first commit contained in the pull request was created to when the pull request was merged.
+- **Last review to merge**: The duration from when the last pull request review was completed to when the pull request is merged.
+
+## Influences
+
+Development of this extension was heavily inspired by [jmartin82/mkpis](https://github.com/jmartin82/mkpis).
