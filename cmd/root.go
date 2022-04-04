@@ -23,13 +23,13 @@ const (
 
 // WorkdayOnlyWeekdays returns true if the given day is a weekday,
 // otherwise returns false.
-func WorkdayOnlyWeekdays(day time.Time) bool {
-	return day.Weekday() != time.Saturday && day.Weekday() != time.Sunday
+func WorkdayOnlyWeekdays(d time.Time) bool {
+	return d.Weekday() != time.Saturday && d.Weekday() != time.Sunday
 }
 
 // WorkdayAllDays returns true regardless of the given day, as currently
 // all days are considered workdays.
-func WorkdayAllDays(_ time.Time) bool {
+func WorkdayAllDays(d time.Time) bool {
 	return true
 }
 
