@@ -35,8 +35,14 @@ func (ui *UI) subtractTime(t1, t2 time.Time) time.Duration {
 
 // formatDuration formats a duration in hours and minutes, rounded
 // to the nearest minute.
-func formatDuration(duration time.Duration) string {
-	return strings.TrimSuffix((duration).Round(time.Minute).String(), "0s")
+func formatDuration(d time.Duration) string {
+	duration := strings.TrimSuffix((d).Round(time.Minute).String(), "0s")
+
+	if len(duration) == 0 {
+		return DefaultEmptyCell
+	}
+
+	return duration
 }
 
 // getTimeToFirstReview returns the time to first review, in hours and

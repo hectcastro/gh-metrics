@@ -163,6 +163,14 @@ func Test_subtractTime_SpanningWeekend(t *testing.T) {
 	st.Assert(t, uiWithoutWeekends.subtractTime(end, start).String(), "6h59m59s")
 }
 
+func Test_formatDuration_LessThanMinute(t *testing.T) {
+	st.Assert(t, formatDuration(time.Second*5), DefaultEmptyCell)
+}
+
+func Test_formatDuration_MoreThanMinute(t *testing.T) {
+	st.Assert(t, formatDuration(time.Minute*5), "5m")
+}
+
 func Test_getTimeToFirstReview(t *testing.T) {
 	var reviews = Reviews{
 		Nodes: ReviewNodes{
