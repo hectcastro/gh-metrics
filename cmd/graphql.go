@@ -8,12 +8,19 @@ type Comments struct {
 	TotalCount int
 }
 
+type Author struct {
+	Login string
+}
+
 type ReviewNodes []struct {
+	Author    Author
 	CreatedAt string
+	State     string
 }
 
 type Reviews struct {
-	Nodes ReviewNodes
+	TotalCount int
+	Nodes      ReviewNodes
 }
 
 type Commit struct {
@@ -41,17 +48,17 @@ type MetricsGQLQuery struct {
 	Search struct {
 		Nodes []struct {
 			PullRequest struct {
-				Additions     int
-				Deletions     int
-				Number        int
-				CreatedAt     string
-				ChangedFiles  int
-				MergedAt      string
-				Participants  Participants
-				Comments      Comments
-				Reviews       Reviews       `graphql:"reviews(first: 1)"`
-				LatestReviews LatestReviews `graphql:"latestReviews(first: 1)"`
-				Commits       Commits       `graphql:"commits(first: 1)"`
+				Author       Author
+				Additions    int
+				Deletions    int
+				Number       int
+				CreatedAt    string
+				ChangedFiles int
+				MergedAt     string
+				Participants Participants
+				Comments     Comments
+				Reviews      Reviews `graphql:"reviews(first: 50, states: [APPROVED, CHANGES_REQUESTED, COMMENTED])"`
+				Commits      Commits `graphql:"commits(first: 1)"`
 			} `graphql:"... on PullRequest"`
 		}
 	} `graphql:"search(query: $query, type: ISSUE, last: 50)"`

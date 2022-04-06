@@ -26,6 +26,9 @@ const (
         "search": {
             "nodes": [
                 {
+                    "author": {
+                        "login": "Batman"
+                    },
                     "additions": 6,
                     "deletions": 3,
                     "number": 5339,
@@ -41,14 +44,11 @@ const (
                     "reviews": {
                         "nodes": [
                             {
-                                "createdAt": "2022-03-21T15:12:52Z"
-                            }
-                        ]
+                                "author": {
+                                    "login": "Joker"
                     },
-                    "latestReviews": {
-                        "nodes": [
-                            {
-                                "createdAt": "2022-03-21T15:12:52Z"
+                                "createdAt": "2022-03-21T15:12:52Z",
+                                "state": "APPROVED"
                             }
                         ]
                     },
@@ -243,10 +243,19 @@ func Test_getFeatureLeadTime_NoCommits(t *testing.T) {
 	st.Assert(t, ui.getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "--")
 }
 
-func Test_getLastReviewToMerge(t *testing.T) {
-	var latestReviews = LatestReviews{
-		Nodes: LatestReviewNodes{
-			{CreatedAt: "2022-03-20T15:11:09Z"},
+func Test_getFirstApprovalToMerge(t *testing.T) {
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author:    Author{Login: "Batman"},
+				CreatedAt: "2022-03-19T15:00:09Z",
+				State:     "COMMENTED",
+			},
+			{
+				Author:    Author{Login: "Joker"},
+				CreatedAt: "2022-03-20T15:11:09Z",
+				State:     "APPROVED",
+			},
 		},
 	}
 
@@ -257,7 +266,7 @@ func Test_getLastReviewToMerge(t *testing.T) {
 			WorkdayEndFunc:   WorkdayEnd,
 		},
 	}
-	st.Assert(t, uiWithWeekends.getLastReviewToMerge("2022-03-21T15:11:09Z", latestReviews), "24h0m")
+	st.Assert(t, uiWithWeekends.getFirstApprovalToMerge("Batman", "2022-03-21T15:11:09Z", reviews), "24h0m")
 
 	uiWithoutWeekends := &UI{
 		Calendar: &cal.BusinessCalendar{
@@ -266,14 +275,14 @@ func Test_getLastReviewToMerge(t *testing.T) {
 			WorkdayEndFunc:   WorkdayEnd,
 		},
 	}
-	st.Assert(t, uiWithoutWeekends.getLastReviewToMerge("2022-03-21T15:11:09Z", latestReviews), "15h11m")
+	st.Assert(t, uiWithoutWeekends.getFirstApprovalToMerge("Batman", "2022-03-21T15:11:09Z", reviews), "15h11m")
 }
 
-func Test_getLastReviewToMerge_NoReviews(t *testing.T) {
-	var latestReviews = LatestReviews{
-		Nodes: LatestReviewNodes{},
+func Test_getFirstApprovalToMerge_NoReviews(t *testing.T) {
+	var reviews = Reviews{
+		Nodes: ReviewNodes{},
 	}
 
 	ui := &UI{}
-	st.Assert(t, ui.getLastReviewToMerge("2022-03-21T15:11:09Z", latestReviews), "--")
+	st.Assert(t, ui.getFirstApprovalToMerge("Batman", "2022-03-21T15:11:09Z", reviews), "--")
 }
