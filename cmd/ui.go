@@ -15,7 +15,8 @@ import (
 
 const (
 	// Default representation of an empty table cell.
-	DefaultEmptyCell = "--"
+	DefaultEmptyCell    = "--"
+	ReviewApprovedState = "APPROVED"
 )
 
 type UI struct {
@@ -77,20 +78,22 @@ func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) strin
 	return formatDuration(ui.subtractTime(prMergedAt, prFirstCommittedAt))
 }
 
-// getLastReviewToMerge returns the last review to merge time, in hours and
-// minutes, for a given PR.
+// getFirstApprovalToMerge returns the first approval review to merge time, in
+// hours and minutes, for a given PR.
 //
-//   lastReviewToMerge = prMergedAt - lastReviewedAt
+//   firstApprovalToMerge = prMergedAt - firstApprovedAt
 //
-func (ui *UI) getLastReviewToMerge(prMergedAtString string, latestReviews LatestReviews) string {
-	if len(latestReviews.Nodes) == 0 {
-		return DefaultEmptyCell
+func (ui *UI) getFirstApprovalToMerge(author, prMergedAtString string, reviews Reviews) string {
+	for _, review := range reviews.Nodes {
+		if review.Author.Login != author && review.State == ReviewApprovedState {
+			prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
+			firstApprovedAt, _ := time.Parse(time.RFC3339, review.CreatedAt)
+
+			return formatDuration(ui.subtractTime(prMergedAt, firstApprovedAt))
+		}
 	}
 
-	prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
-	latestReviewedAt, _ := time.Parse(time.RFC3339, latestReviews.Nodes[0].CreatedAt)
-
-	return formatDuration(ui.subtractTime(prMergedAt, latestReviewedAt))
+	return DefaultEmptyCell
 }
 
 // PrintMetrics returns a string representation of the metrics summary for
@@ -130,7 +133,7 @@ func (ui *UI) PrintMetrics() string {
 		"Comments",
 		"Participants",
 		"Feature Lead Time",
-		"Last Review to Merge",
+		"First Approval to Merge",
 	})
 
 	for _, node := range gqlQuery.Search.Nodes {
@@ -150,9 +153,10 @@ func (ui *UI) PrintMetrics() string {
 				node.PullRequest.MergedAt,
 				node.PullRequest.Commits,
 			),
-			ui.getLastReviewToMerge(
+			ui.getFirstApprovalToMerge(
+				node.PullRequest.Author.Login,
 				node.PullRequest.MergedAt,
-				node.PullRequest.LatestReviews,
+				node.PullRequest.Reviews,
 			),
 		})
 	}

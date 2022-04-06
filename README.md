@@ -67,7 +67,7 @@ PR,Commits,Additions,Deletions,Changed Files,Time to First Review,Comments,Parti
 
 - **Time to first review**: The duration from when the pull request was created to when the first review against it was completed.
 - **Feature lead time**: The duration from when the first commit contained in the pull request was created to when the pull request was merged.
-- **Last review to merge**: The duration from when the last pull request review was completed to when the pull request is merged.
+- **First approval to merge**: The duration from when the first approval review is given to when the pull request is merged.
 
 ## Influences
 
