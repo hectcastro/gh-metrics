@@ -34,6 +34,7 @@ const (
                     "number": 5339,
                     "createdAt": "2022-03-21T15:11:09Z",
                     "changedFiles": 1,
+                    "isDraft": false,
                     "mergedAt": "2022-03-21T16:22:05Z",
                     "participants": {
                         "totalCount": 3
@@ -46,19 +47,27 @@ const (
                             {
                                 "author": {
                                     "login": "Joker"
-                    },
+                                },
                                 "createdAt": "2022-03-21T15:12:52Z",
                                 "state": "APPROVED"
                             }
                         ]
                     },
                     "commits": {
-                        "totalCount": 4,
+                        "totalCount": 1,
                         "nodes": [
                             {
                                 "commit": {
                                     "committedDate": "2022-03-21T15:09:52Z"
                                 }
+                            }
+                        ]
+                    },
+                    "timelineItems": {
+                        "totalCount": 1,
+                        "nodes": [
+                            {
+                                "createdAt": "2022-03-15T03:46:20Z"
                             }
                         ]
                     }
@@ -125,7 +134,8 @@ func Test_SearchQuery_WithCSV(t *testing.T) {
 		Calendar:   cal.NewBusinessCalendar(),
 	}
 
-	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339,4,6,3,1,2m,0,3,1h12m,--,1h9m"), true)
+	t.Log(ui.PrintMetrics())
+	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339,1,6,3,1,38h13m,0,3,1h12m,--,1h9m"), true)
 }
 
 func Test_subtractTime_WithinWorkday(t *testing.T) {
@@ -171,10 +181,39 @@ func Test_formatDuration_MoreThanMinute(t *testing.T) {
 	st.Assert(t, formatDuration(time.Minute*5), "5m")
 }
 
+func Test_getReadyForReviewOrPrCreatedAt_prCreatedAt(t *testing.T) {
+	st.Assert(t, getReadyForReviewOrPrCreatedAt("2022-03-21T15:11:09Z", TimelineItems{
+		TotalCount: 0,
+	}) == "2022-03-21T15:11:09Z", true)
+}
+
+func Test_getReadyForReviewOrPrCreatedAt_readyForReviewAt(t *testing.T) {
+	st.Assert(t, getReadyForReviewOrPrCreatedAt("2022-03-21T15:11:09Z", TimelineItems{
+		TotalCount: 1,
+		Nodes: TimelineItemNodes{
+			{ReadyForReviewEvent{CreatedAt: "2022-03-22T15:11:09Z"}},
+		}}) == "2022-03-22T15:11:09Z", true)
+}
+
 func Test_getTimeToFirstReview(t *testing.T) {
+	var timelineItems = TimelineItems{
+		TotalCount: 1,
+		Nodes: TimelineItemNodes{
+			{ReadyForReviewEvent{CreatedAt: "2022-03-21T15:11:09Z"}},
+		},
+	}
 	var reviews = Reviews{
 		Nodes: ReviewNodes{
-			{CreatedAt: "2022-03-22T15:11:09Z"},
+			{
+				Author:    Author{Login: "Batman"},
+				CreatedAt: "2022-03-19T15:00:09Z",
+				State:     "COMMENTED",
+			},
+			{
+				Author:    Author{Login: "Joker"},
+				CreatedAt: "2022-03-20T15:11:09Z",
+				State:     "APPROVED",
+			},
 		},
 	}
 
@@ -185,7 +224,7 @@ func Test_getTimeToFirstReview(t *testing.T) {
 			WorkdayEndFunc:   WorkdayEnd,
 		},
 	}
-	st.Assert(t, uiWithWeekends.getTimeToFirstReview("2022-03-21T15:11:09Z", reviews), "24h0m")
+	st.Assert(t, uiWithWeekends.getTimeToFirstReview("Batman", "", false, timelineItems, reviews), "24h0m")
 
 	uiWithoutWeekends := &UI{
 		Calendar: &cal.BusinessCalendar{
@@ -194,16 +233,39 @@ func Test_getTimeToFirstReview(t *testing.T) {
 			WorkdayEndFunc:   WorkdayEnd,
 		},
 	}
-	st.Assert(t, uiWithoutWeekends.getTimeToFirstReview("2022-03-21T15:11:09Z", reviews), "24h0m")
+	st.Assert(t, uiWithoutWeekends.getTimeToFirstReview("Batman", "", false, timelineItems, reviews), "15h11m")
+}
+
+func Test_getTimeToFirstReview_Draft(t *testing.T) {
+	var timelineItems = TimelineItems{
+		Nodes: TimelineItemNodes{},
+	}
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author:    Author{Login: "Joker"},
+				CreatedAt: "2022-03-22T15:11:09Z",
+				State:     "COMMENTED",
+			},
+		},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getTimeToFirstReview("Batman", "", true, timelineItems, reviews), "--")
 }
 
 func Test_getTimeToFirstReview_NoReviews(t *testing.T) {
+	var timelineItems = TimelineItems{
+		Nodes: TimelineItemNodes{
+			{ReadyForReviewEvent{CreatedAt: "2022-03-21T15:11:09Z"}},
+		},
+	}
 	var reviews = Reviews{
 		Nodes: ReviewNodes{},
 	}
 
 	ui := &UI{}
-	st.Assert(t, ui.getTimeToFirstReview("2022-03-21T15:11:09Z", reviews), "--")
+	st.Assert(t, ui.getTimeToFirstReview("Batman", "", false, timelineItems, reviews), "--")
 }
 
 func Test_getFeatureLeadTime(t *testing.T) {
