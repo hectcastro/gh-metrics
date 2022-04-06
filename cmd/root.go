@@ -103,8 +103,8 @@ func init() {
 	today := time.Now().UTC()
 	start := today.AddDate(0, 0, -DefaultDaysBack)
 
-	RootCmd.Flags().StringP("start", "s", start.Format(DefaultDateFormat), "target start of date range")
-	RootCmd.Flags().StringP("end", "e", today.Format(DefaultDateFormat), "target end of date range")
+	RootCmd.Flags().StringP("start", "s", start.Format(DefaultDateFormat), "target start of date range for merged pull requests")
+	RootCmd.Flags().StringP("end", "e", today.Format(DefaultDateFormat), "target end of date range for merged pull requests")
 
 	RootCmd.Flags().BoolP("only-weekdays", "w", false, "only include weekdays (M-F) in date range calculations")
 	RootCmd.Flags().BoolP("csv", "c", false, "print output as CSV")
