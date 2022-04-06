@@ -46,20 +46,39 @@ func formatDuration(d time.Duration) string {
 	return duration
 }
 
+// getReadyForReviewOrPrCreatedAt returns when the pull request was
+// marked ready for review, or its created date (if it was never in
+// a draft state).
+func getReadyForReviewOrPrCreatedAt(prCreated string, timelineItems TimelineItems) string {
+	if timelineItems.TotalCount == 0 {
+		return prCreated
+	}
+
+	return timelineItems.Nodes[0].ReadyForReviewEvent.CreatedAt
+}
+
 // getTimeToFirstReview returns the time to first review, in hours and
 // minutes, for a given PR.
 //
-//   firstReview = firstReviewAt - prCreatedAt
+//   timeToFirstReview = (readyForReviewAt || prCreatedAt) - firstReviewdAt
 //
-func (ui *UI) getTimeToFirstReview(prCreatedAtString string, reviews Reviews) string {
-	if len(reviews.Nodes) == 0 {
+func (ui *UI) getTimeToFirstReview(author, prCreatedAt string, isDraft bool, timelineItems TimelineItems, reviews Reviews) string {
+	// The pull request is still in a draft state, because it has not
+	// yet been marked as ready for review.
+	if timelineItems.TotalCount == 0 && isDraft {
 		return DefaultEmptyCell
 	}
 
-	firstReviewedAt, _ := time.Parse(time.RFC3339, reviews.Nodes[0].CreatedAt)
-	prCreatedAt, _ := time.Parse(time.RFC3339, prCreatedAtString)
+	for _, review := range reviews.Nodes {
+		if review.Author.Login != author {
+			readyForReviewOrPrCreatedAt, _ := time.Parse(time.RFC3339, getReadyForReviewOrPrCreatedAt(prCreatedAt, timelineItems))
+			firstReviewedAt, _ := time.Parse(time.RFC3339, review.CreatedAt)
 
-	return formatDuration(ui.subtractTime(firstReviewedAt, prCreatedAt.UTC()))
+			return formatDuration(ui.subtractTime(firstReviewedAt, readyForReviewOrPrCreatedAt))
+		}
+	}
+
+	return DefaultEmptyCell
 }
 
 // getFeatureLeadTime returns the feature lead time, in hours and minutes,
@@ -175,7 +194,10 @@ func (ui *UI) PrintMetrics() string {
 			node.PullRequest.Deletions,
 			node.PullRequest.ChangedFiles,
 			ui.getTimeToFirstReview(
+				node.PullRequest.Author.Login,
 				node.PullRequest.CreatedAt,
+				node.PullRequest.IsDraft,
+				node.PullRequest.TimelineItems,
 				node.PullRequest.Reviews,
 			),
 			node.PullRequest.Comments.TotalCount,
