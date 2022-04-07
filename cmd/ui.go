@@ -78,6 +78,24 @@ func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) strin
 	return formatDuration(ui.subtractTime(prMergedAt, prFirstCommittedAt))
 }
 
+// getFirstReviewToLastReview returns the first review to last review time, in
+// hours and minutes, for a given PR.
+//
+//   firstReviewToLastReview = lastReviewedAt - firstReviewedAt
+//
+func (ui *UI) getFirstReviewToLastReview(login string, reviews Reviews) string {
+	for _, review := range reviews.Nodes {
+		if review.Author.Login != login {
+			firstReviewedAt, _ := time.Parse(time.RFC3339, review.CreatedAt)
+			lastReviewedAt, _ := time.Parse(time.RFC3339, reviews.Nodes[len(reviews.Nodes)-1].CreatedAt)
+
+			return formatDuration(ui.subtractTime(lastReviewedAt, firstReviewedAt))
+		}
+	}
+
+	return DefaultEmptyCell
+}
+
 // getFirstApprovalToMerge returns the first approval review to merge time, in
 // hours and minutes, for a given PR.
 //
@@ -133,6 +151,7 @@ func (ui *UI) PrintMetrics() string {
 		"Comments",
 		"Participants",
 		"Feature Lead Time",
+		"First Review to Last Review",
 		"First Approval to Merge",
 	})
 
@@ -152,6 +171,10 @@ func (ui *UI) PrintMetrics() string {
 			ui.getFeatureLeadTime(
 				node.PullRequest.MergedAt,
 				node.PullRequest.Commits,
+			),
+			ui.getFirstReviewToLastReview(
+				node.PullRequest.Author.Login,
+				node.PullRequest.Reviews,
 			),
 			ui.getFirstApprovalToMerge(
 				node.PullRequest.Author.Login,
