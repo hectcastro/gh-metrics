@@ -78,17 +78,29 @@ func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) strin
 	return formatDuration(ui.subtractTime(prMergedAt, prFirstCommittedAt))
 }
 
-// getFirstReviewToLastReview returns the first review to last review time, in
+// getFirstReviewToLastReview returns the first review to last approving review time, in
 // hours and minutes, for a given PR.
 //
 //   firstReviewToLastReview = lastReviewedAt - firstReviewedAt
 //
 func (ui *UI) getFirstReviewToLastReview(login string, reviews Reviews) string {
+	var nonAuthorReviews ReviewNodes
 	for _, review := range reviews.Nodes {
 		if review.Author.Login != login {
-			firstReviewedAt, _ := time.Parse(time.RFC3339, review.CreatedAt)
-			lastReviewedAt, _ := time.Parse(time.RFC3339, reviews.Nodes[len(reviews.Nodes)-1].CreatedAt)
+			nonAuthorReviews = append(nonAuthorReviews, review)
+		}
+	}
 
+	if len(nonAuthorReviews) == 0 {
+		return DefaultEmptyCell
+	}
+
+	firstReviewedAt, _ := time.Parse(time.RFC3339, nonAuthorReviews[0].CreatedAt)
+
+	// Iterate in reverse order to get the last approving review
+	for i := len(nonAuthorReviews) - 1; i >= 0; i-- {
+		if nonAuthorReviews[i].State == ReviewApprovedState {
+			lastReviewedAt, _ := time.Parse(time.RFC3339, nonAuthorReviews[i].CreatedAt)
 			return formatDuration(ui.subtractTime(lastReviewedAt, firstReviewedAt))
 		}
 	}
