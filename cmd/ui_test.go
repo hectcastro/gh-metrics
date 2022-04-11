@@ -281,6 +281,82 @@ func Test_getFirstReviewToLastReview(t *testing.T) {
 	st.Assert(t, uiWithWeekends.getFirstReviewToLastReview("Batman", reviews), "1h0m")
 }
 
+func Test_getFirstReviewToLastReview_AuthorReviewLast(t *testing.T) {
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author: Author{
+					Login: "Joker",
+				},
+				CreatedAt: "2022-04-06T16:11:09Z",
+				State:     "CHANGES_REQUESTED",
+			},
+			{
+				Author: Author{
+					Login: "Joker",
+				},
+				CreatedAt: "2022-04-06T17:11:09Z",
+				State:     "APPROVED",
+			},
+			{
+				Author: Author{
+					Login: "Batman",
+				},
+				CreatedAt: "2022-04-06T18:11:09Z",
+				State:     "COMMENTED",
+			},
+		},
+	}
+
+	uiWithWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayAllDays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+
+	st.Assert(t, uiWithWeekends.getFirstReviewToLastReview("Batman", reviews), "1h0m")
+}
+
+func Test_getFirstReviewToLastReview_ReviewerReviewCommentLast(t *testing.T) {
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author: Author{
+					Login: "Joker",
+				},
+				CreatedAt: "2022-04-06T16:11:09Z",
+				State:     "CHANGES_REQUESTED",
+			},
+			{
+				Author: Author{
+					Login: "Joker",
+				},
+				CreatedAt: "2022-04-06T17:11:09Z",
+				State:     "APPROVED",
+			},
+			{
+				Author: Author{
+					Login: "Joker",
+				},
+				CreatedAt: "2022-04-06T18:11:09Z",
+				State:     "COMMENTED",
+			},
+		},
+	}
+
+	uiWithWeekends := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayAllDays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+
+	st.Assert(t, uiWithWeekends.getFirstReviewToLastReview("Batman", reviews), "1h0m")
+}
+
 func Test_getFirstApprovalToMerge(t *testing.T) {
 	var reviews = Reviews{
 		Nodes: ReviewNodes{
