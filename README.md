@@ -18,55 +18,54 @@ Once installed, you can summarize all pull requests for the `cli/cli` repository
 
 ```console
 $ gh metrics --owner cli --repo cli
-┌──────┬─────────┬───────────┬───────────┬───────────────┬──────────────────────┬──────────┬──────────────┬───────────────────┬──────────────────────┐
-│   PR │ COMMITS │ ADDITIONS │ DELETIONS │ CHANGED FILES │ TIME TO FIRST REVIEW │ COMMENTS │ PARTICIPANTS │ FEATURE LEAD TIME │ LAST REVIEW TO MERGE │
-├──────┼─────────┼───────────┼───────────┼───────────────┼──────────────────────┼──────────┼──────────────┼───────────────────┼──────────────────────┤
-│ 5339 │       4 │         6 │         3 │             1 │ 2m0s                 │        0 │            3 │ 1h12m0s           │ 1h9m0s               │
-│ 5336 │       1 │         2 │         2 │             2 │ 7m0s                 │        0 │            1 │ 2h30m0s           │ 2h24m0s              │
-│ 5327 │       1 │         1 │         1 │             1 │ 41h57m0s             │        1 │            4 │ 65h44m0s          │ 14m0s                │
-│ 5323 │       1 │         3 │         2 │             2 │ 11m0s                │        0 │            1 │ 15m0s             │ 4m0s                 │
-│ 5319 │      16 │       318 │        39 │            12 │ 14h23m0s             │        1 │            4 │ 18h9m0s           │ 2h43m0s              │
-│ 5298 │       1 │         1 │         1 │             1 │ 16m0s                │        0 │            2 │ 72h29m0s          │ 72h13m0s             │
-│ 5297 │       1 │         1 │         0 │             1 │ 10h51m0s             │        0 │            4 │ 83h8m0s           │ 72h11m0s             │
-│ 5296 │       6 │        46 │         1 │             2 │ 2h7m0s               │        1 │            5 │ 84h35m0s          │ 82h7m0s              │
-│ 5279 │       3 │        31 │         4 │             6 │ 252h35m0s            │        2 │            3 │ 252h37m0s         │ 1m0s                 │
-│ 5276 │       1 │         2 │         1 │             1 │ 15h41m0s             │        0 │            4 │ 284h19m0s         │ 29h2m0s              │
-│ 5275 │       7 │       179 │        37 │             4 │ 169h8m0s             │        3 │            4 │ 787h15m0s         │ 23h35m0s             │
-│ 5270 │      27 │       520 │        72 │            11 │ 10h49m0s             │        1 │            6 │ 719h41m0s         │ 336h17m0s            │
-│ 5251 │       4 │       133 │        24 │             3 │ 180h49m0s            │        0 │            4 │ 423h13m0s         │ 2h17m0s              │
-│ 5160 │       2 │       215 │        65 │             4 │ 987h48m0s            │        2 │            4 │ 31h33m0s          │ 0s                   │
-│ 5134 │       9 │       445 │        66 │             6 │ 854h10m0s            │        0 │            3 │ 1043h38m0s        │ 0s                   │
-│ 4895 │      15 │       497 │        32 │             3 │ 236h37m0s            │        7 │            4 │ 2211h51m0s        │ 1h41m0s              │
-└──────┴─────────┴───────────┴───────────┴───────────────┴──────────────────────┴──────────┴──────────────┴───────────────────┴──────────────────────┘
+┌──────┬─────────┬───────────┬───────────┬───────────────┬──────────────────────┬──────────┬──────────────┬───────────────────┬─────────────────────────────┬─────────────────────────┐
+│   PR │ COMMITS │ ADDITIONS │ DELETIONS │ CHANGED FILES │ TIME TO FIRST REVIEW │ COMMENTS │ PARTICIPANTS │ FEATURE LEAD TIME │ FIRST REVIEW TO LAST REVIEW │ FIRST APPROVAL TO MERGE │
+├──────┼─────────┼───────────┼───────────┼───────────────┼──────────────────────┼──────────┼──────────────┼───────────────────┼─────────────────────────────┼─────────────────────────┤
+│ 5437 │       2 │       240 │         2 │             9 │ 28m                  │        0 │            2 │ 5h51m             │ --                          │ 5h14m                   │
+│ 5436 │       1 │        39 │        18 │             6 │ 9m                   │        0 │            2 │ 1h51m             │ --                          │ 1h40m                   │
+│ 5423 │       1 │        41 │         8 │             2 │ 1h7m                 │        0 │            2 │ 67h55m            │ --                          │ 66h44m                  │
+│ 5410 │       4 │        10 │        74 │             4 │ 12h45m               │        3 │            4 │ 44h39m            │ 26h47m                      │ 30h41m                  │
+│ 5409 │       2 │       113 │         1 │             3 │ 11h58m               │        0 │            3 │ 24h56m            │ 7h29m                       │ 9m                      │
+│ 5408 │       1 │         3 │         5 │             1 │ 13h25m               │        0 │            2 │ 18h15m            │ --                          │ 4h52m                   │
+│ 5406 │       1 │         1 │         0 │             1 │ 18h5m                │        1 │            4 │ 18h19m            │ --                          │ 14m                     │
+│ 5405 │       1 │         2 │         8 │             1 │ 2h17m                │        0 │            5 │ 19h0m             │ 15h47m                      │ 16h38m                  │
+│ 5396 │       1 │        37 │         2 │             2 │ 207h33m              │        0 │            3 │ 207h40m           │ --                          │ 6m                      │
+│ 5390 │       7 │       183 │         0 │             3 │ 65h41m               │        1 │            4 │ 329h11m           │ 23h56m                      │ 4h29m                   │
+│ 5388 │       4 │         8 │         3 │             5 │ 89h0m                │        0 │            4 │ 238h47m           │ 149h47m                     │ 1h39m                   │
+│ 5380 │       5 │        54 │         7 │             3 │ --                   │        1 │            6 │ 282h6m            │ 277h6m                      │ --                      │
+│ 5378 │       2 │        58 │        10 │             9 │ 184h0m               │        0 │            3 │ 285h40m           │ --                          │ 101h36m                 │
+│ 5366 │       6 │       101 │       376 │            12 │ 23h58m               │        1 │            2 │ 234h38m           │ 195h57m                     │ 27m                     │
+└──────┴─────────┴───────────┴───────────┴───────────────┴──────────────────────┴──────────┴──────────────┴───────────────────┴─────────────────────────────┴─────────────────────────┘
 ```
 
 Or, within a more precise window of time:
 
 ```console
 $ gh metrics --owner cli --repo cli --start 2022-03-21 --end 2022-03-22
-┌──────┬─────────┬───────────┬───────────┬───────────────┬──────────────────────┬──────────┬──────────────┬───────────────────┬──────────────────────┐
-│   PR │ COMMITS │ ADDITIONS │ DELETIONS │ CHANGED FILES │ TIME TO FIRST REVIEW │ COMMENTS │ PARTICIPANTS │ FEATURE LEAD TIME │ LAST REVIEW TO MERGE │
-├──────┼─────────┼───────────┼───────────┼───────────────┼──────────────────────┼──────────┼──────────────┼───────────────────┼──────────────────────┤
-│ 5339 │       4 │         6 │         3 │             1 │ 2m0s                 │        0 │            3 │ 1h12m0s           │ 1h9m0s               │
-│ 5336 │       1 │         2 │         2 │             2 │ 7m0s                 │        0 │            1 │ 2h30m0s           │ 2h24m0s              │
-│ 5327 │       1 │         1 │         1 │             1 │ 41h57m0s             │        1 │            4 │ 65h44m0s          │ 14m0s                │
-└──────┴─────────┴───────────┴───────────┴───────────────┴──────────────────────┴──────────┴──────────────┴───────────────────┴──────────────────────┘
+┌──────┬─────────┬───────────┬───────────┬───────────────┬──────────────────────┬──────────┬──────────────┬───────────────────┬─────────────────────────────┬─────────────────────────┐
+│   PR │ COMMITS │ ADDITIONS │ DELETIONS │ CHANGED FILES │ TIME TO FIRST REVIEW │ COMMENTS │ PARTICIPANTS │ FEATURE LEAD TIME │ FIRST REVIEW TO LAST REVIEW │ FIRST APPROVAL TO MERGE │
+├──────┼─────────┼───────────┼───────────┼───────────────┼──────────────────────┼──────────┼──────────────┼───────────────────┼─────────────────────────────┼─────────────────────────┤
+│ 5339 │       4 │         6 │         3 │             1 │ 2m                   │        0 │            3 │ 1h12m             │ 59m                         │ 1h9m                    │
+│ 5336 │       1 │         2 │         2 │             2 │ 7m                   │        0 │            1 │ 2h30m             │ --                          │ 2h24m                   │
+│ 5327 │       1 │         1 │         1 │             1 │ 41h57m               │        1 │            4 │ 65h44m            │ 23h21m                      │ 23h36m                  │
+└──────┴─────────┴───────────┴───────────┴───────────────┴──────────────────────┴──────────┴──────────────┴───────────────────┴─────────────────────────────┴─────────────────────────┘
 ```
 
 Alternatively, instead of the default table output, output can be generated in CSV format:
 
 ```console
 $ gh metrics --owner cli --repo cli --start 2022-03-21 --end 2022-03-22 --csv
-PR,Commits,Additions,Deletions,Changed Files,Time to First Review,Comments,Participants,Feature Lead Time,Last Review to Merge
-5339,4,6,3,1,2m0s,0,3,1h12m0s,1h9m0s
-5336,1,2,2,2,7m0s,0,1,2h30m0s,2h24m0s
-5327,1,1,1,1,41h57m0s,1,4,65h44m0s,14m0s
+PR,Commits,Additions,Deletions,Changed Files,Time to First Review,Comments,Participants,Feature Lead Time,First Review to Last Review,First Approval to Merge
+5339,4,6,3,1,2m,0,3,1h12m,59m,1h9m
+5336,1,2,2,2,7m,0,1,2h30m,--,2h24m
+5327,1,1,1,1,41h57m,1,4,65h44m,23h21m,23h36m
 ```
 
 ## Metric definitions
 
 - **Time to first review**: The duration from when the pull request was created to when the first review against it was completed.
 - **Feature lead time**: The duration from when the first commit contained in the pull request was created to when the pull request was merged.
+- **First review to last review**: The duration between the first non-author review and the last approving non-author review ([Background](https://github.com/hectcastro/gh-metrics/issues/13)) 
 - **First approval to merge**: The duration from when the first approval review is given to when the pull request is merged.
 
 ## Influences
