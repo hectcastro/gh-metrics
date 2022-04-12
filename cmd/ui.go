@@ -182,7 +182,7 @@ func (ui *UI) PrintMetrics() string {
 		"Comments",
 		"Participants",
 		"Feature Lead Time",
-		"First Review to Last Review",
+		"First to Last Review",
 		"First Approval to Merge",
 	})
 
