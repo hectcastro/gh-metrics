@@ -16,6 +16,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           types: |
+            build
             ci
             docs
             feat
@@ -24,6 +25,7 @@ jobs:
             test
           scopes: |
             cmd
+            deps
           requireScope: false
           validateSingleCommit: true
           validateSingleCommitMatchesPrTitle: true
