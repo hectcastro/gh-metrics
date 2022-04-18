@@ -24,6 +24,10 @@ const (
 {
     "data": {
         "search": {
+            "pageInfo": {
+                "hasNextPage": false,
+                "endCursor": "Y3Vyc29yOjI="
+            },
             "nodes": [
                 {
                     "author": {
@@ -49,6 +53,13 @@ const (
                                     "login": "Joker"
                                 },
                                 "createdAt": "2022-03-21T15:12:52Z",
+                                "state": "COMMENTED"
+                            },
+                            {
+                                "author": {
+                                    "login": "Joker"
+                                },
+                                "createdAt": "2022-03-22T15:12:52Z",
                                 "state": "APPROVED"
                             }
                         ]
@@ -71,6 +82,60 @@ const (
                             }
                         ]
                     }
+                },
+                {
+                    "author": {
+                        "login": "Batman"
+                    },
+                    "additions": 12,
+                    "deletions": 6,
+                    "number": 5340,
+                    "createdAt": "2022-03-22T15:11:09Z",
+                    "changedFiles": 2,
+                    "isDraft": false,
+                    "mergedAt": "2022-03-22T16:22:05Z",
+                    "participants": {
+                        "totalCount": 3
+                    },
+                    "comments": {
+                        "totalCount": 0
+                    },
+                    "reviews": {
+                        "nodes": [
+                            {
+                                "author": {
+                                    "login": "Joker"
+                                },
+                                "createdAt": "2022-03-22T15:12:52Z",
+                                "state": "COMMENTED"
+                            },
+                            {
+                                "author": {
+                                    "login": "Joker"
+                                },
+                                "createdAt": "2022-03-23T15:12:52Z",
+                                "state": "APPROVED"
+                            }
+                        ]
+                    },
+                    "commits": {
+                        "totalCount": 1,
+                        "nodes": [
+                            {
+                                "commit": {
+                                    "committedDate": "2022-03-22T15:09:52Z"
+                                }
+                            }
+                        ]
+                    },
+                    "timelineItems": {
+                        "totalCount": 1,
+                        "nodes": [
+                            {
+                                "createdAt": "2022-03-16T03:46:20Z"
+                            }
+                        ]
+                    }
                 }
             ]
         }
@@ -87,7 +152,7 @@ type GQLRequest struct {
 func gqlSearchQueryMatcher(req *http.Request, ereq *gock.Request) (bool, error) {
 	var gqlRequest GQLRequest
 
-	body, err := ioutil.ReadAll(req.Body)
+	var body, err = ioutil.ReadAll(req.Body)
 	err = json.Unmarshal(body, &gqlRequest)
 
 	return gqlRequest.Variables.Query == fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s", Owner, Repository, StartDate, EndDate), err
@@ -112,7 +177,10 @@ func Test_SearchQuery(t *testing.T) {
 		Calendar:   cal.NewBusinessCalendar(),
 	}
 
-	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339"), true)
+	have := ui.PrintMetrics()
+
+	st.Assert(t, strings.Contains(have, "5339"), true)
+	st.Assert(t, strings.Contains(have, "5340"), true)
 }
 
 func Test_SearchQuery_WithCSV(t *testing.T) {
@@ -134,8 +202,48 @@ func Test_SearchQuery_WithCSV(t *testing.T) {
 		Calendar:   cal.NewBusinessCalendar(),
 	}
 
-	t.Log(ui.PrintMetrics())
-	st.Assert(t, strings.Contains(ui.PrintMetrics(), "5339,1,6,3,1,38h13m,0,3,1h12m,--,1h9m"), true)
+	have := ui.PrintMetrics()
+
+	st.Assert(t, strings.Contains(have, "5339,1,6,3,1,38h13m,0,3,1h12m,8h0m,6h51m"), true)
+	st.Assert(t, strings.Contains(have, "5340,1,12,6,2,38h13m,0,3,1h12m,8h0m,6h51m"), true)
+}
+
+func Test_SearchQuery_WithPagination(t *testing.T) {
+	defer gock.Off()
+
+	responseJSONWithPagination := strings.ReplaceAll(
+		strings.Clone(ResponseJSON),
+		"\"hasNextPage\": false,",
+		"\"hasNextPage\": true,",
+	)
+
+	gock.New("https://api.github.com/graphql").
+		Post("/").
+		MatchType("json").
+		AddMatcher(gqlSearchQueryMatcher).
+		Reply(200).
+		BodyString(responseJSONWithPagination)
+
+	gock.New("https://api.github.com/graphql").
+		Post("/").
+		MatchType("json").
+		AddMatcher(gqlSearchQueryMatcher).
+		Reply(200).
+		BodyString(ResponseJSON)
+
+	ui := &UI{
+		Owner:      Owner,
+		Repository: Repository,
+		StartDate:  StartDate,
+		EndDate:    EndDate,
+		CSVFormat:  true,
+		Calendar:   cal.NewBusinessCalendar(),
+	}
+
+	have := ui.printMetricsImpl(1)
+
+	st.Assert(t, strings.Contains(have, "5339,1,6,3,1,38h13m,0,3,1h12m,8h0m,6h51m"), true)
+	st.Assert(t, strings.Contains(have, "5340,1,12,6,2,38h13m,0,3,1h12m,8h0m,6h51m"), true)
 }
 
 func Test_subtractTime_WithinWorkday(t *testing.T) {
