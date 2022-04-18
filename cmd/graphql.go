@@ -1,15 +1,20 @@
 package cmd
 
+type PageInfo struct {
+	HasNextPage bool
+	EndCursor   string
+}
+
+type Author struct {
+	Login string
+}
+
 type Participants struct {
 	TotalCount int
 }
 
 type Comments struct {
 	TotalCount int
-}
-
-type Author struct {
-	Login string
 }
 
 type ReviewNodes []struct {
@@ -51,7 +56,8 @@ type TimelineItems struct {
 
 type MetricsGQLQuery struct {
 	Search struct {
-		Nodes []struct {
+		PageInfo PageInfo
+		Nodes    []struct {
 			PullRequest struct {
 				Author        Author
 				Additions     int
@@ -68,5 +74,5 @@ type MetricsGQLQuery struct {
 				TimelineItems TimelineItems `graphql:"timelineItems(first: 1, itemTypes: [READY_FOR_REVIEW_EVENT])"`
 			} `graphql:"... on PullRequest"`
 		}
-	} `graphql:"search(query: $query, type: ISSUE, last: 50)"`
+	} `graphql:"search(query: $query, type: ISSUE, last: $resultCount, after: $afterCursor)"`
 }

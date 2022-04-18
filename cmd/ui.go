@@ -15,7 +15,10 @@ import (
 
 const (
 	// Default representation of an empty table cell.
-	DefaultEmptyCell    = "--"
+	DefaultEmptyCell = "--"
+	// Default number of search results per query.
+	DefaultResultCount = 100
+	// Pull request review approved state.
 	ReviewApprovedState = "APPROVED"
 )
 
@@ -146,8 +149,15 @@ func (ui *UI) getFirstApprovalToMerge(author, prMergedAtString string, reviews R
 }
 
 // PrintMetrics returns a string representation of the metrics summary for
-// a set of pull requests determined by the supplied date range.
+// a set of pull requests determined by the supplied date range, using
+// DefaultResultCount.
 func (ui *UI) PrintMetrics() string {
+	return ui.printMetricsImpl(DefaultResultCount)
+}
+
+// printMetricsImpl returns a string representation of the metrics summary
+// for a set of pull requests determined by the supplied date range.
+func (ui *UI) printMetricsImpl(defaultResultCount int) string {
 	client, err := gh.GQLClient(
 		&api.ClientOptions{
 			EnableCache: true,
@@ -159,12 +169,14 @@ func (ui *UI) PrintMetrics() string {
 		log.Fatal("To authenticate, please run `gh auth login`.")
 	}
 
-	variables := map[string]interface{}{
-		"query": graphql.String(fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s", ui.Owner, ui.Repository, ui.StartDate, ui.EndDate)),
+	var gqlQuery MetricsGQLQuery
+	var gqlQueryVariables map[string]interface{} = map[string]interface{}{
+		"query":       graphql.String(fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s", ui.Owner, ui.Repository, ui.StartDate, ui.EndDate)),
+		"resultCount": graphql.Int(defaultResultCount),
+		"afterCursor": (*graphql.String)(nil),
 	}
 
-	var gqlQuery MetricsGQLQuery
-	err = client.Query("PullRequests", &gqlQuery, variables)
+	err = client.Query("PullRequests", &gqlQuery, gqlQueryVariables)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -186,36 +198,48 @@ func (ui *UI) PrintMetrics() string {
 		"First Approval to Merge",
 	})
 
-	for _, node := range gqlQuery.Search.Nodes {
-		t.AppendRow(table.Row{
-			node.PullRequest.Number,
-			node.PullRequest.Commits.TotalCount,
-			node.PullRequest.Additions,
-			node.PullRequest.Deletions,
-			node.PullRequest.ChangedFiles,
-			ui.getTimeToFirstReview(
-				node.PullRequest.Author.Login,
-				node.PullRequest.CreatedAt,
-				node.PullRequest.IsDraft,
-				node.PullRequest.TimelineItems,
-				node.PullRequest.Reviews,
-			),
-			node.PullRequest.Comments.TotalCount,
-			node.PullRequest.Participants.TotalCount,
-			ui.getFeatureLeadTime(
-				node.PullRequest.MergedAt,
-				node.PullRequest.Commits,
-			),
-			ui.getFirstReviewToLastReview(
-				node.PullRequest.Author.Login,
-				node.PullRequest.Reviews,
-			),
-			ui.getFirstApprovalToMerge(
-				node.PullRequest.Author.Login,
-				node.PullRequest.MergedAt,
-				node.PullRequest.Reviews,
-			),
-		})
+	for {
+		for _, node := range gqlQuery.Search.Nodes {
+			t.AppendRow(table.Row{
+				node.PullRequest.Number,
+				node.PullRequest.Commits.TotalCount,
+				node.PullRequest.Additions,
+				node.PullRequest.Deletions,
+				node.PullRequest.ChangedFiles,
+				ui.getTimeToFirstReview(
+					node.PullRequest.Author.Login,
+					node.PullRequest.CreatedAt,
+					node.PullRequest.IsDraft,
+					node.PullRequest.TimelineItems,
+					node.PullRequest.Reviews,
+				),
+				node.PullRequest.Comments.TotalCount,
+				node.PullRequest.Participants.TotalCount,
+				ui.getFeatureLeadTime(
+					node.PullRequest.MergedAt,
+					node.PullRequest.Commits,
+				),
+				ui.getFirstReviewToLastReview(
+					node.PullRequest.Author.Login,
+					node.PullRequest.Reviews,
+				),
+				ui.getFirstApprovalToMerge(
+					node.PullRequest.Author.Login,
+					node.PullRequest.MergedAt,
+					node.PullRequest.Reviews,
+				),
+			})
+		}
+
+		if gqlQuery.Search.PageInfo.HasNextPage {
+			gqlQueryVariables["afterCursor"] = graphql.String(gqlQuery.Search.PageInfo.EndCursor)
+			err = client.Query("PullRequests", &gqlQuery, gqlQueryVariables)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			break
+		}
 	}
 
 	if ui.CSVFormat {
