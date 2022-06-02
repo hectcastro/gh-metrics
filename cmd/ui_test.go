@@ -204,8 +204,8 @@ func Test_SearchQuery_WithCSV(t *testing.T) {
 
 	have := ui.PrintMetrics()
 
-	st.Assert(t, strings.Contains(have, "5339,1,6,3,1,38h13m,0,3,1h12m,8h0m,6h51m"), true)
-	st.Assert(t, strings.Contains(have, "5340,1,12,6,2,38h13m,0,3,1h12m,8h0m,6h51m"), true)
+	st.Assert(t, strings.Contains(have, "5339,1,6,3,1,38:13,0,3,01:12,08:00,06:51"), true)
+	st.Assert(t, strings.Contains(have, "5340,1,12,6,2,38:13,0,3,01:12,08:00,06:51"), true)
 }
 
 func Test_SearchQuery_WithPagination(t *testing.T) {
@@ -242,8 +242,8 @@ func Test_SearchQuery_WithPagination(t *testing.T) {
 
 	have := ui.printMetricsImpl(1)
 
-	st.Assert(t, strings.Contains(have, "5339,1,6,3,1,38h13m,0,3,1h12m,8h0m,6h51m"), true)
-	st.Assert(t, strings.Contains(have, "5340,1,12,6,2,38h13m,0,3,1h12m,8h0m,6h51m"), true)
+	st.Assert(t, strings.Contains(have, "5339,1,6,3,1,38:13,0,3,01:12,08:00,06:51"), true)
+	st.Assert(t, strings.Contains(have, "5340,1,12,6,2,38:13,0,3,01:12,08:00,06:51"), true)
 }
 
 func Test_subtractTime_WithinWorkday(t *testing.T) {
@@ -282,11 +282,19 @@ func Test_subtractTime_SpanningWeekend(t *testing.T) {
 }
 
 func Test_formatDuration_LessThanMinute(t *testing.T) {
-	st.Assert(t, formatDuration(time.Second*5), DefaultEmptyCell)
+	st.Assert(t, formatDuration(time.Second*5, false), DefaultEmptyCell)
+}
+
+func Test_formatDuration_LessThanMinuteWithCSV(t *testing.T) {
+	st.Assert(t, formatDuration(time.Second*5, true), "00:00")
 }
 
 func Test_formatDuration_MoreThanMinute(t *testing.T) {
-	st.Assert(t, formatDuration(time.Minute*5), "5m")
+	st.Assert(t, formatDuration(time.Minute*5, false), "5m")
+}
+
+func Test_formatDuration_MoreThanMinuteWithCSV(t *testing.T) {
+	st.Assert(t, formatDuration(time.Minute*5, true), "00:05")
 }
 
 func Test_getReadyForReviewOrPrCreatedAt_prCreatedAt(t *testing.T) {

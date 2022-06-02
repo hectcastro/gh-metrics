@@ -39,14 +39,30 @@ func (ui *UI) subtractTime(t1, t2 time.Time) time.Duration {
 
 // formatDuration formats a duration in hours and minutes, rounded
 // to the nearest minute.
-func formatDuration(d time.Duration) string {
-	duration := strings.TrimSuffix((d).Round(time.Minute).String(), "0s")
+func formatDuration(d time.Duration, csvFormat bool) string {
+	roundedDuration := d.Round(time.Minute)
+
+	if csvFormat {
+		return excelCompatDuration(roundedDuration)
+	}
+
+	duration := strings.TrimSuffix(roundedDuration.String(), "0s")
 
 	if len(duration) == 0 {
 		return DefaultEmptyCell
 	}
 
 	return duration
+}
+
+// excelCompatDuration formats a duration in hours and minutes, for
+// Excel compatibility, rounded to the nearest minute.
+func excelCompatDuration(d time.Duration) string {
+	h := d / time.Hour
+	d -= h * time.Hour
+	m := d / time.Minute
+
+	return fmt.Sprintf("%02d:%02d", h, m)
 }
 
 // getReadyForReviewOrPrCreatedAt returns when the pull request was
@@ -77,7 +93,7 @@ func (ui *UI) getTimeToFirstReview(author, prCreatedAt string, isDraft bool, tim
 			readyForReviewOrPrCreatedAt, _ := time.Parse(time.RFC3339, getReadyForReviewOrPrCreatedAt(prCreatedAt, timelineItems))
 			firstReviewedAt, _ := time.Parse(time.RFC3339, review.CreatedAt)
 
-			return formatDuration(ui.subtractTime(firstReviewedAt, readyForReviewOrPrCreatedAt))
+			return formatDuration(ui.subtractTime(firstReviewedAt, readyForReviewOrPrCreatedAt), ui.CSVFormat)
 		}
 	}
 
@@ -97,7 +113,7 @@ func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) strin
 	prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
 	prFirstCommittedAt, _ := time.Parse(time.RFC3339, commits.Nodes[0].Commit.CommittedDate)
 
-	return formatDuration(ui.subtractTime(prMergedAt, prFirstCommittedAt))
+	return formatDuration(ui.subtractTime(prMergedAt, prFirstCommittedAt), ui.CSVFormat)
 }
 
 // getFirstReviewToLastReview returns the first review to last approving review time, in
@@ -123,7 +139,7 @@ func (ui *UI) getFirstReviewToLastReview(login string, reviews Reviews) string {
 	for i := len(nonAuthorReviews) - 1; i >= 0; i-- {
 		if nonAuthorReviews[i].State == ReviewApprovedState {
 			lastReviewedAt, _ := time.Parse(time.RFC3339, nonAuthorReviews[i].CreatedAt)
-			return formatDuration(ui.subtractTime(lastReviewedAt, firstReviewedAt))
+			return formatDuration(ui.subtractTime(lastReviewedAt, firstReviewedAt), ui.CSVFormat)
 		}
 	}
 
@@ -141,7 +157,7 @@ func (ui *UI) getFirstApprovalToMerge(author, prMergedAtString string, reviews R
 			prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
 			firstApprovedAt, _ := time.Parse(time.RFC3339, review.CreatedAt)
 
-			return formatDuration(ui.subtractTime(prMergedAt, firstApprovedAt))
+			return formatDuration(ui.subtractTime(prMergedAt, firstApprovedAt), ui.CSVFormat)
 		}
 	}
 
