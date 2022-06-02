@@ -57,9 +57,9 @@ Alternatively, instead of the default table output, output can be generated in C
 ```console
 $ gh metrics --owner cli --repo cli --start 2022-03-21 --end 2022-03-22 --csv
 PR,Commits,Additions,Deletions,Changed Files,Time to First Review,Comments,Participants,Feature Lead Time,First to Last Review,First Approval to Merge
-5339,4,6,3,1,2m,0,3,1h12m,59m,1h9m
-5336,1,2,2,2,7m,0,1,2h30m,--,2h24m
-5327,1,1,1,1,41h57m,1,4,65h44m,23h21m,23h36m
+5339,4,6,3,1,00:02,0,3,01:12,00:59,01:09
+5336,1,2,2,2,00:07,0,1,02:30,00:00,02:24
+5327,1,1,1,1,41:57,1,4,65:44,23:21,23:36
 ```
 
 ## Metric definitions
