@@ -23,7 +23,7 @@ require (
 	github.com/cli/shurcooL-graphql v0.0.1
 	github.com/henvic/httpretty v0.0.6 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.3.3
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.5.0
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
