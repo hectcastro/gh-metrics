@@ -55,6 +55,7 @@ var RootCmd = &cobra.Command{
 		repository, _ := cmd.Flags().GetString("repo")
 		startDate, _ := cmd.Flags().GetString("start")
 		endDate, _ := cmd.Flags().GetString("end")
+		query, _ := cmd.Flags().GetString("query")
 		onlyWeekdays, _ := cmd.Flags().GetBool("only-weekdays")
 		csvFormat, _ := cmd.Flags().GetBool("csv")
 
@@ -82,6 +83,7 @@ var RootCmd = &cobra.Command{
 			Repository: repository,
 			StartDate:  startDate,
 			EndDate:    endDate,
+			Query:      query,
 			CSVFormat:  csvFormat,
 			Calendar:   calendar,
 		}
@@ -105,6 +107,7 @@ func init() {
 
 	RootCmd.Flags().StringP("start", "s", start.Format(DefaultDateFormat), "target start of date range for merged pull requests")
 	RootCmd.Flags().StringP("end", "e", today.Format(DefaultDateFormat), "target end of date range for merged pull requests")
+	RootCmd.Flags().StringP("query", "q", "", "additional query filter for merged pull requests")
 
 	RootCmd.Flags().BoolP("only-weekdays", "w", false, "only include weekdays (M-F) in date range calculations")
 	RootCmd.Flags().BoolP("csv", "c", false, "print output as CSV")

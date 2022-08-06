@@ -27,6 +27,7 @@ type UI struct {
 	Repository string
 	StartDate  string
 	EndDate    string
+	Query      string
 	CSVFormat  bool
 	Calendar   *cal.BusinessCalendar
 }
@@ -79,8 +80,7 @@ func getReadyForReviewOrPrCreatedAt(prCreated string, timelineItems TimelineItem
 // getTimeToFirstReview returns the time to first review, in hours and
 // minutes, for a given PR.
 //
-//   timeToFirstReview = (readyForReviewAt || prCreatedAt) - firstReviewdAt
-//
+//	timeToFirstReview = (readyForReviewAt || prCreatedAt) - firstReviewdAt
 func (ui *UI) getTimeToFirstReview(author, prCreatedAt string, isDraft bool, timelineItems TimelineItems, reviews Reviews) string {
 	// The pull request is still in a draft state, because it has not
 	// yet been marked as ready for review.
@@ -103,8 +103,7 @@ func (ui *UI) getTimeToFirstReview(author, prCreatedAt string, isDraft bool, tim
 // getFeatureLeadTime returns the feature lead time, in hours and minutes,
 // for a given PR.
 //
-//   featureLeadTime = prMergedAt - firstCommitAt
-//
+//	featureLeadTime = prMergedAt - firstCommitAt
 func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) string {
 	if len(commits.Nodes) == 0 {
 		return DefaultEmptyCell
@@ -119,8 +118,7 @@ func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) strin
 // getFirstReviewToLastReview returns the first review to last approving review time, in
 // hours and minutes, for a given PR.
 //
-//   firstReviewToLastReview = lastReviewedAt - firstReviewedAt
-//
+//	firstReviewToLastReview = lastReviewedAt - firstReviewedAt
 func (ui *UI) getFirstReviewToLastReview(login string, reviews Reviews) string {
 	var nonAuthorReviews ReviewNodes
 	for _, review := range reviews.Nodes {
@@ -149,8 +147,7 @@ func (ui *UI) getFirstReviewToLastReview(login string, reviews Reviews) string {
 // getFirstApprovalToMerge returns the first approval review to merge time, in
 // hours and minutes, for a given PR.
 //
-//   firstApprovalToMerge = prMergedAt - firstApprovedAt
-//
+//	firstApprovalToMerge = prMergedAt - firstApprovedAt
 func (ui *UI) getFirstApprovalToMerge(author, prMergedAtString string, reviews Reviews) string {
 	for _, review := range reviews.Nodes {
 		if review.Author.Login != author && review.State == ReviewApprovedState {
@@ -187,7 +184,13 @@ func (ui *UI) printMetricsImpl(defaultResultCount int) string {
 
 	var gqlQuery MetricsGQLQuery
 	var gqlQueryVariables map[string]interface{} = map[string]interface{}{
-		"query":       graphql.String(fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s", ui.Owner, ui.Repository, ui.StartDate, ui.EndDate)),
+		"query": graphql.String(
+			strings.TrimSpace(fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s %s",
+				ui.Owner,
+				ui.Repository,
+				ui.StartDate,
+				ui.EndDate,
+				ui.Query))),
 		"resultCount": graphql.Int(defaultResultCount),
 		"afterCursor": (*graphql.String)(nil),
 	}
