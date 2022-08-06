@@ -19,6 +19,7 @@ const (
 	Repository = "testRepo"
 	StartDate  = "2022-03-18"
 	EndDate    = "2022-03-28"
+	Query      = "author:Batman"
 
 	ResponseJSON = `
 {
@@ -155,7 +156,25 @@ func gqlSearchQueryMatcher(req *http.Request, ereq *gock.Request) (bool, error) 
 	var body, err = io.ReadAll(req.Body)
 	err = json.Unmarshal(body, &gqlRequest)
 
-	return gqlRequest.Variables.Query == fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s", Owner, Repository, StartDate, EndDate), err
+	return gqlRequest.Variables.Query == fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s",
+		Owner,
+		Repository,
+		StartDate,
+		EndDate), err
+}
+
+func gqlSearchQueryWithFilterMatcher(req *http.Request, ereq *gock.Request) (bool, error) {
+	var gqlRequest GQLRequest
+
+	var body, err = io.ReadAll(req.Body)
+	err = json.Unmarshal(body, &gqlRequest)
+
+	return gqlRequest.Variables.Query == fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s %s",
+		Owner,
+		Repository,
+		StartDate,
+		EndDate,
+		Query), err
 }
 
 func Test_SearchQuery(t *testing.T) {
@@ -236,6 +255,32 @@ func Test_SearchQuery_WithPagination(t *testing.T) {
 		Repository: Repository,
 		StartDate:  StartDate,
 		EndDate:    EndDate,
+		CSVFormat:  true,
+		Calendar:   cal.NewBusinessCalendar(),
+	}
+
+	have := ui.printMetricsImpl(1)
+
+	st.Assert(t, strings.Contains(have, "5339,1,6,3,1,38:13,0,3,01:12,08:00,06:51"), true)
+	st.Assert(t, strings.Contains(have, "5340,1,12,6,2,38:13,0,3,01:12,08:00,06:51"), true)
+}
+
+func Test_SearchQuery_WithQueryFilter(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("https://api.github.com/graphql").
+		Post("/").
+		MatchType("json").
+		AddMatcher(gqlSearchQueryWithFilterMatcher).
+		Reply(200).
+		BodyString(ResponseJSON)
+
+	ui := &UI{
+		Owner:      Owner,
+		Repository: Repository,
+		StartDate:  StartDate,
+		EndDate:    EndDate,
+		Query:      Query,
 		CSVFormat:  true,
 		Calendar:   cal.NewBusinessCalendar(),
 	}
