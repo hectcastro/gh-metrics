@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -152,7 +152,7 @@ type GQLRequest struct {
 func gqlSearchQueryMatcher(req *http.Request, ereq *gock.Request) (bool, error) {
 	var gqlRequest GQLRequest
 
-	var body, err = ioutil.ReadAll(req.Body)
+	var body, err = io.ReadAll(req.Body)
 	err = json.Unmarshal(body, &gqlRequest)
 
 	return gqlRequest.Variables.Query == fmt.Sprintf("repo:%s/%s type:pr merged:%s..%s", Owner, Repository, StartDate, EndDate), err
