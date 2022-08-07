@@ -34,6 +34,13 @@ func Test_RootCmd_OnlyOwner(t *testing.T) {
 	st.Assert(t, strings.Contains(actual, expected), true)
 }
 
+func Test_RootCmd_OnlyRepo(t *testing.T) {
+	actual := execute("--repo=cli")
+	expected := "Error: required flag(s) \"owner\" not set"
+
+	st.Assert(t, strings.Contains(actual, expected), true)
+}
+
 func Test_WorkdayOnlyWeekdays(t *testing.T) {
 	friday := time.Date(2022, 4, 1, 0, 0, 0, 0, time.UTC)
 	saturday := time.Date(2022, 4, 2, 0, 0, 0, 0, time.UTC)
