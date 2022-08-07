@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -23,6 +24,13 @@ func execute(args string) string {
 func Test_RootCmd_NoArgs(t *testing.T) {
 	actual := execute("")
 	expected := "Error: required flag(s) \"owner\", \"repo\" not set"
+
+	st.Assert(t, strings.Contains(actual, expected), true)
+}
+
+func Test_RootCmd_Version(t *testing.T) {
+	actual := execute("--version")
+	expected := fmt.Sprintf("gh-metrics version %s", Version)
 
 	st.Assert(t, strings.Contains(actual, expected), true)
 }

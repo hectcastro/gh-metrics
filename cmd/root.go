@@ -4,7 +4,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/rickar/cal/v2"
@@ -48,8 +47,9 @@ func WorkdayEnd(d time.Time) time.Time {
 }
 
 var RootCmd = &cobra.Command{
-	Use:   "gh-metrics",
-	Short: "gh-metrics: provide summary pull request metrics",
+	Use:     "gh-metrics",
+	Short:   "gh-metrics: provide summary pull request metrics",
+	Version: Version,
 	Run: func(cmd *cobra.Command, args []string) {
 		owner, _ := cmd.Flags().GetString("owner")
 		repository, _ := cmd.Flags().GetString("repo")
@@ -58,12 +58,6 @@ var RootCmd = &cobra.Command{
 		query, _ := cmd.Flags().GetString("query")
 		onlyWeekdays, _ := cmd.Flags().GetBool("only-weekdays")
 		csvFormat, _ := cmd.Flags().GetBool("csv")
-
-		version, _ := cmd.Flags().GetBool("version")
-		if version {
-			fmt.Println("gh-metrics", Version)
-			os.Exit(0)
-		}
 
 		var workdayFunc cal.WorkdayFn
 		if onlyWeekdays {
@@ -111,5 +105,4 @@ func init() {
 
 	RootCmd.Flags().BoolP("only-weekdays", "w", false, "only include weekdays (M-F) in date range calculations")
 	RootCmd.Flags().BoolP("csv", "c", false, "print output as CSV")
-	RootCmd.Flags().BoolP("version", "v", false, "print current version")
 }
