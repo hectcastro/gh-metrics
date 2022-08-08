@@ -12,7 +12,7 @@ import (
 
 const (
 	// Extension version. Displayed when `--version` flag is used.
-	Version = "2.0.0"
+	Version = "2.1.0"
 	// Default number of days in the past to look for pull requests
 	// within a repository.
 	DefaultDaysBack = 10
