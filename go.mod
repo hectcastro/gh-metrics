@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/cli/go-gh v0.1.0
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32
-	github.com/rickar/cal/v2 v2.1.5
+	github.com/rickar/cal/v2 v2.1.6
 	github.com/spf13/pflag v1.0.5
 	gopkg.in/h2non/gock.v1 v1.1.2
 )
