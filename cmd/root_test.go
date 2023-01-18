@@ -42,7 +42,10 @@ func execute(t *testing.T, args string) string {
 func Test_RootCmd_NoArgs(t *testing.T) {
 	defer gock.Off()
 
-	currentRepo, _ := gh.CurrentRepository()
+	currentRepo, err := gh.CurrentRepository()
+	if err != nil {
+		t.Error(err)
+	}
 
 	gock.New("https://api.github.com/graphql").
 		Post("/").
