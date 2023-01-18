@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	gh "github.com/cli/go-gh"
 	"github.com/rickar/cal/v2"
 	"github.com/spf13/cobra"
 )
@@ -18,6 +19,15 @@ const (
 	DefaultDaysBack = 10
 	// Default date format to use when displaying dates.
 	DefaultDateFormat = "2006-01-02"
+)
+
+var (
+	// defaultStart is the default start date to query pull requests if none is
+	// specified.
+	defaultStart string
+	// defaultEnd is the default end date to query pull requests if none is
+	// specified.
+	defaultEnd string
 )
 
 // WorkdayOnlyWeekdays returns true if the given day is a weekday,
@@ -50,14 +60,18 @@ var RootCmd = &cobra.Command{
 	Use:     "gh-metrics",
 	Short:   "gh-metrics: provide summary pull request metrics",
 	Version: Version,
-	Run: func(cmd *cobra.Command, args []string) {
-		owner, _ := cmd.Flags().GetString("owner")
+	RunE: func(cmd *cobra.Command, args []string) error {
 		repository, _ := cmd.Flags().GetString("repo")
 		startDate, _ := cmd.Flags().GetString("start")
 		endDate, _ := cmd.Flags().GetString("end")
 		query, _ := cmd.Flags().GetString("query")
 		onlyWeekdays, _ := cmd.Flags().GetBool("only-weekdays")
 		csvFormat, _ := cmd.Flags().GetBool("csv")
+
+		repo, err := newGHRepo(repository)
+		if err != nil {
+			return err
+		}
 
 		var workdayFunc cal.WorkdayFn
 		if onlyWeekdays {
@@ -73,8 +87,9 @@ var RootCmd = &cobra.Command{
 		}
 
 		ui := &UI{
-			Owner:      owner,
-			Repository: repository,
+			Owner:      repo.Owner,
+			Repository: repo.Name,
+			Host:       repo.Host,
 			StartDate:  startDate,
 			EndDate:    endDate,
 			Query:      query,
@@ -82,7 +97,9 @@ var RootCmd = &cobra.Command{
 			Calendar:   calendar,
 		}
 
-		fmt.Println(ui.PrintMetrics())
+		cmd.Println(ui.PrintMetrics())
+
+		return nil
 	},
 }
 
@@ -91,16 +108,20 @@ func Execute() {
 }
 
 func init() {
-	RootCmd.Flags().StringP("owner", "o", "", "target repository owner")
-	RootCmd.MarkFlagRequired("owner")
-	RootCmd.Flags().StringP("repo", "r", "", "target repository name")
-	RootCmd.MarkFlagRequired("repo")
+	defaultRepo := ""
+	currentRepo, _ := gh.CurrentRepository()
+	if currentRepo != nil {
+		defaultRepo = fmt.Sprintf("%s/%s", currentRepo.Owner(), currentRepo.Name())
+	}
+
+	RootCmd.Flags().StringP("repo", "r", defaultRepo, "target repository in '[HOST/]OWNER/REPO' format (defaults to the current working directory's repository)")
 
 	today := time.Now().UTC()
-	start := today.AddDate(0, 0, -DefaultDaysBack)
+	defaultStart = today.AddDate(0, 0, -DefaultDaysBack).Format(DefaultDateFormat)
+	defaultEnd = today.Format(DefaultDateFormat)
 
-	RootCmd.Flags().StringP("start", "s", start.Format(DefaultDateFormat), "target start of date range for merged pull requests")
-	RootCmd.Flags().StringP("end", "e", today.Format(DefaultDateFormat), "target end of date range for merged pull requests")
+	RootCmd.Flags().StringP("start", "s", defaultStart, "target start of date range for merged pull requests")
+	RootCmd.Flags().StringP("end", "e", defaultEnd, "target end of date range for merged pull requests")
 	RootCmd.Flags().StringP("query", "q", "", "additional query filter for merged pull requests")
 
 	RootCmd.Flags().BoolP("only-weekdays", "w", false, "only include weekdays (M-F) in date range calculations")

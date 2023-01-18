@@ -23,6 +23,7 @@ const (
 )
 
 type UI struct {
+	Host       string
 	Owner      string
 	Repository string
 	StartDate  string
@@ -173,6 +174,7 @@ func (ui *UI) PrintMetrics() string {
 func (ui *UI) printMetricsImpl(defaultResultCount int) string {
 	client, err := gh.GQLClient(
 		&api.ClientOptions{
+			Host:        ui.Host,
 			EnableCache: true,
 			CacheTTL:    15 * time.Minute,
 			Timeout:     5 * time.Second,

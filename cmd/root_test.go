@@ -7,9 +7,11 @@ import (
 	"testing"
 	"time"
 
+	gh "github.com/cli/go-gh"
 	"github.com/nbio/st"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"gopkg.in/h2non/gock.v1"
 )
 
 func ResetSubCommandFlagValues(t *testing.T, root *cobra.Command) {
@@ -38,8 +40,24 @@ func execute(t *testing.T, args string) string {
 }
 
 func Test_RootCmd_NoArgs(t *testing.T) {
+	defer gock.Off()
+
+	currentRepo, _ := gh.CurrentRepository()
+
+	gock.New("https://api.github.com/graphql").
+		Post("/").
+		MatchType("json").
+		AddMatcher(gqlSearchQueryMatcher(currentRepo.Owner(), currentRepo.Name(), defaultStart, defaultEnd)).
+		Reply(200).
+		BodyString(ResponseJSON)
+
 	actual := execute(t, "")
-	expected := "Error: required flag(s) \"owner\", \"repo\" not set"
+	expected := `┌──────┬─────────┬───────────┬───────────┬───────────────┬──────────────────────┬──────────┬──────────────┬───────────────────┬──────────────────────┬─────────────────────────┐
+│   PR │ COMMITS │ ADDITIONS │ DELETIONS │ CHANGED FILES │ TIME TO FIRST REVIEW │ COMMENTS │ PARTICIPANTS │ FEATURE LEAD TIME │ FIRST TO LAST REVIEW │ FIRST APPROVAL TO MERGE │
+├──────┼─────────┼───────────┼───────────┼───────────────┼──────────────────────┼──────────┼──────────────┼───────────────────┼──────────────────────┼─────────────────────────┤
+│ 5339 │       1 │         6 │         3 │             1 │ 155h26m              │        0 │            3 │ 1h12m             │ 24h0m                │ 22h51m                  │
+│ 5340 │       1 │        12 │         6 │             2 │ 155h26m              │        0 │            3 │ 1h12m             │ 24h0m                │ 22h51m                  │
+└──────┴─────────┴───────────┴───────────┴───────────────┴──────────────────────┴──────────┴──────────────┴───────────────────┴──────────────────────┴─────────────────────────┘`
 
 	st.Assert(t, strings.Contains(actual, expected), true)
 }
@@ -51,16 +69,9 @@ func Test_RootCmd_Version(t *testing.T) {
 	st.Assert(t, strings.Contains(actual, expected), true)
 }
 
-func Test_RootCmd_OnlyOwner(t *testing.T) {
-	actual := execute(t, "--owner=cli")
-	expected := "Error: required flag(s) \"repo\" not set"
-
-	st.Assert(t, strings.Contains(actual, expected), true)
-}
-
 func Test_RootCmd_OnlyRepo(t *testing.T) {
 	actual := execute(t, "--repo=cli")
-	expected := "Error: required flag(s) \"owner\" not set"
+	expected := "invalid repository name"
 
 	st.Assert(t, strings.Contains(actual, expected), true)
 }
