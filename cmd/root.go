@@ -114,7 +114,7 @@ func init() {
 		defaultRepo = fmt.Sprintf("%s/%s", currentRepo.Owner(), currentRepo.Name())
 	}
 
-	RootCmd.Flags().StringP("repo", "r", defaultRepo, "target repository in '[HOST/]OWNER/REPO' format (defaults to the current working directory's repository)")
+	RootCmd.Flags().StringP("repo", "R", defaultRepo, "target repository in '[HOST/]OWNER/REPO' format (defaults to the current working directory's repository)")
 
 	today := time.Now().UTC()
 	defaultStart = today.AddDate(0, 0, -DefaultDaysBack).Format(DefaultDateFormat)
