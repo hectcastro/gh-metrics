@@ -17,7 +17,7 @@ $ gh extension install hectcastro/gh-metrics
 Once installed, you can summarize all pull requests for the `cli/cli` repository over the last 10 days:
 
 ```console
-$ gh metrics --owner cli --repo cli
+$ gh metrics --repo cli/cli
 ┌──────┬─────────┬───────────┬───────────┬───────────────┬──────────────────────┬──────────┬──────────────┬───────────────────┬──────────────────────┬─────────────────────────┐
 │   PR │ COMMITS │ ADDITIONS │ DELETIONS │ CHANGED FILES │ TIME TO FIRST REVIEW │ COMMENTS │ PARTICIPANTS │ FEATURE LEAD TIME │ FIRST TO LAST REVIEW │ FIRST APPROVAL TO MERGE │
 ├──────┼─────────┼───────────┼───────────┼───────────────┼──────────────────────┼──────────┼──────────────┼───────────────────┼──────────────────────┼─────────────────────────┤
@@ -32,7 +32,7 @@ $ gh metrics --owner cli --repo cli
 Or, within a more precise window of time:
 
 ```console
-$ gh metrics --owner cli --repo cli --start 2022-03-21 --end 2022-03-22
+$ gh metrics --repo cli/cli --start 2022-03-21 --end 2022-03-22
 ┌──────┬─────────┬───────────┬───────────┬───────────────┬──────────────────────┬──────────┬──────────────┬───────────────────┬──────────────────────┬─────────────────────────┐
 │   PR │ COMMITS │ ADDITIONS │ DELETIONS │ CHANGED FILES │ TIME TO FIRST REVIEW │ COMMENTS │ PARTICIPANTS │ FEATURE LEAD TIME │ FIRST TO LAST REVIEW │ FIRST APPROVAL TO MERGE │
 ├──────┼─────────┼───────────┼───────────┼───────────────┼──────────────────────┼──────────┼──────────────┼───────────────────┼──────────────────────┼─────────────────────────┤
@@ -45,7 +45,7 @@ $ gh metrics --owner cli --repo cli --start 2022-03-21 --end 2022-03-22
 Or, with an additional query filter:
 
 ```console
-$ gh metrics --owner cli --repo cli --start 2022-03-21 --end 2022-03-22 --query "author:josebalius"
+$ gh metrics --repo cli/cli --start 2022-03-21 --end 2022-03-22 --query "author:josebalius"
 ┌──────┬─────────┬───────────┬───────────┬───────────────┬──────────────────────┬──────────┬──────────────┬───────────────────┬──────────────────────┬─────────────────────────┐
 │   PR │ COMMITS │ ADDITIONS │ DELETIONS │ CHANGED FILES │ TIME TO FIRST REVIEW │ COMMENTS │ PARTICIPANTS │ FEATURE LEAD TIME │ FIRST TO LAST REVIEW │ FIRST APPROVAL TO MERGE │
 ├──────┼─────────┼───────────┼───────────┼───────────────┼──────────────────────┼──────────┼──────────────┼───────────────────┼──────────────────────┼─────────────────────────┤
@@ -56,7 +56,7 @@ $ gh metrics --owner cli --repo cli --start 2022-03-21 --end 2022-03-22 --query 
 Alternatively, instead of the default table output, output can be generated in CSV format:
 
 ```console
-$ gh metrics --owner cli --repo cli --start 2022-03-21 --end 2022-03-22 --csv
+$ gh metrics --repo cli/cli --start 2022-03-21 --end 2022-03-22 --csv
 PR,Commits,Additions,Deletions,Changed Files,Time to First Review,Comments,Participants,Feature Lead Time,First to Last Review,First Approval to Merge
 5339,4,6,3,1,00:02,0,3,01:12,00:59,01:09
 5336,1,2,2,2,00:07,0,1,02:30,00:00,02:24
