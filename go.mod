@@ -26,7 +26,7 @@ require (
 
 require (
 	github.com/cli/safeexec v1.0.0 // indirect
-	github.com/cli/shurcooL-graphql v0.0.2
+	github.com/cli/shurcooL-graphql v0.0.3
 	github.com/henvic/httpretty v0.0.6 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.4.4
 	github.com/spf13/cobra v1.6.1
