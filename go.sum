@@ -38,8 +38,8 @@ github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32/go.mod h1:9wM+0iRr9ahx58uY
 github.com/pkg/profile v1.6.0/go.mod h1:qBsxPvzyUincmltOk6iyRVxHYg4adc0OFOv72ZdLa18=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/rickar/cal/v2 v2.1.12 h1:OYbclmECBUTn6m7Nhz/HgsFhI3S/lHc3PfiXpU5bIgA=
-github.com/rickar/cal/v2 v2.1.12/go.mod h1:/fdlMcx7GjPlIBibMzOM9gMvDBsrK+mOtRXdTzUqV/A=
+github.com/rickar/cal/v2 v2.1.13 h1:FENBPXxDPyL1OWGf9ZdpWGcEiGoSjt0UZED8VOxvK0c=
+github.com/rickar/cal/v2 v2.1.13/go.mod h1:/fdlMcx7GjPlIBibMzOM9gMvDBsrK+mOtRXdTzUqV/A=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.4 h1:8TfxU8dW6PdqD27gjM8MVNuicgxIjxpm4K7x4jp8sis=
 github.com/rivo/uniseg v0.4.4/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
