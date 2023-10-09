@@ -27,10 +27,9 @@ require (
 
 require (
 	github.com/cli/safeexec v1.0.1 // indirect
-	github.com/cli/shurcooL-graphql v0.0.3
+	github.com/cli/shurcooL-graphql v0.0.4
 	github.com/henvic/httpretty v0.1.0 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.4.8
 	github.com/spf13/cobra v1.7.0
-	golang.org/x/net v0.7.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
