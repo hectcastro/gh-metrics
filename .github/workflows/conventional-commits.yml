@@ -17,6 +17,7 @@ jobs:
         with:
           types: |
             build
+            chore
             ci
             docs
             feat
