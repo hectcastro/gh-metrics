@@ -30,6 +30,6 @@ require (
 	github.com/cli/shurcooL-graphql v0.0.4
 	github.com/henvic/httpretty v0.1.0 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.5.9
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
