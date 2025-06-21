@@ -1,6 +1,6 @@
 module github.com/hectcastro/gh-metrics
 
-go 1.22
+go 1.24
 
 require (
 	github.com/cli/go-gh v1.2.1
