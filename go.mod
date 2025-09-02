@@ -6,7 +6,7 @@ require (
 	github.com/cli/go-gh v1.2.1
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32
 	github.com/rickar/cal/v2 v2.1.24
-	github.com/spf13/pflag v1.0.7
+	github.com/spf13/pflag v1.0.9
 	gopkg.in/h2non/gock.v1 v1.1.2
 )
 
