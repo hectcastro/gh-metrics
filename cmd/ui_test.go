@@ -288,6 +288,48 @@ func Test_getTimeToFirstReview_NoReviews(t *testing.T) {
 	st.Assert(t, ui.getTimeToFirstReview("Batman", "", false, timelineItems, reviews), "--")
 }
 
+func Test_getTimeToFirstReview_InvalidReadyForReviewDate(t *testing.T) {
+	var timelineItems = TimelineItems{
+		TotalCount: 1,
+		Nodes: TimelineItemNodes{
+			{ReadyForReviewEvent{CreatedAt: "invalid-date"}},
+		},
+	}
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author:    Author{Login: "Joker"},
+				CreatedAt: "2022-03-20T15:11:09Z",
+				State:     "APPROVED",
+			},
+		},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getTimeToFirstReview("Batman", "", false, timelineItems, reviews), "--")
+}
+
+func Test_getTimeToFirstReview_InvalidReviewDate(t *testing.T) {
+	var timelineItems = TimelineItems{
+		TotalCount: 1,
+		Nodes: TimelineItemNodes{
+			{ReadyForReviewEvent{CreatedAt: "2022-03-21T15:11:09Z"}},
+		},
+	}
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author:    Author{Login: "Joker"},
+				CreatedAt: "not-a-valid-timestamp",
+				State:     "APPROVED",
+			},
+		},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getTimeToFirstReview("Batman", "", false, timelineItems, reviews), "--")
+}
+
 func Test_getFeatureLeadTime(t *testing.T) {
 	var commits = Commits{
 		TotalCount: 1,
@@ -319,6 +361,30 @@ func Test_getFeatureLeadTime_NoCommits(t *testing.T) {
 	var commits = Commits{
 		TotalCount: 0,
 		Nodes:      CommitNodes{},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "--")
+}
+
+func Test_getFeatureLeadTime_InvalidMergeDate(t *testing.T) {
+	var commits = Commits{
+		TotalCount: 1,
+		Nodes: CommitNodes{
+			{Commit{CommittedDate: "2022-03-20T15:11:09Z"}},
+		},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getFeatureLeadTime("invalid-merge-date", commits), "--")
+}
+
+func Test_getFeatureLeadTime_InvalidCommitDate(t *testing.T) {
+	var commits = Commits{
+		TotalCount: 1,
+		Nodes: CommitNodes{
+			{Commit{CommittedDate: "not-a-timestamp"}},
+		},
 	}
 
 	ui := &UI{}
@@ -487,6 +553,54 @@ func Test_getFirstReviewToLastReview_NoApprovals(t *testing.T) {
 	st.Assert(t, uiWithWeekends.getFirstReviewToLastReview("Batman", reviews), DefaultEmptyCell)
 }
 
+func Test_getFirstReviewToLastReview_InvalidFirstReviewDate(t *testing.T) {
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author: Author{
+					Login: "Joker",
+				},
+				CreatedAt: "bad-timestamp",
+				State:     "COMMENTED",
+			},
+			{
+				Author: Author{
+					Login: "Joker",
+				},
+				CreatedAt: "2022-04-06T17:11:09Z",
+				State:     "APPROVED",
+			},
+		},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getFirstReviewToLastReview("Batman", reviews), DefaultEmptyCell)
+}
+
+func Test_getFirstReviewToLastReview_InvalidLastReviewDate(t *testing.T) {
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author: Author{
+					Login: "Joker",
+				},
+				CreatedAt: "2022-04-06T16:11:09Z",
+				State:     "COMMENTED",
+			},
+			{
+				Author: Author{
+					Login: "Joker",
+				},
+				CreatedAt: "invalid-date-format",
+				State:     "APPROVED",
+			},
+		},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getFirstReviewToLastReview("Batman", reviews), DefaultEmptyCell)
+}
+
 func Test_getFirstApprovalToMerge(t *testing.T) {
 	var reviews = Reviews{
 		Nodes: ReviewNodes{
@@ -525,6 +639,36 @@ func Test_getFirstApprovalToMerge(t *testing.T) {
 func Test_getFirstApprovalToMerge_NoReviews(t *testing.T) {
 	var reviews = Reviews{
 		Nodes: ReviewNodes{},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getFirstApprovalToMerge("Batman", "2022-03-21T15:11:09Z", reviews), "--")
+}
+
+func Test_getFirstApprovalToMerge_InvalidMergeDate(t *testing.T) {
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author:    Author{Login: "Joker"},
+				CreatedAt: "2022-03-20T15:11:09Z",
+				State:     "APPROVED",
+			},
+		},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getFirstApprovalToMerge("Batman", "not-a-date", reviews), "--")
+}
+
+func Test_getFirstApprovalToMerge_InvalidApprovalDate(t *testing.T) {
+	var reviews = Reviews{
+		Nodes: ReviewNodes{
+			{
+				Author:    Author{Login: "Joker"},
+				CreatedAt: "malformed-timestamp",
+				State:     "APPROVED",
+			},
+		},
 	}
 
 	ui := &UI{}
