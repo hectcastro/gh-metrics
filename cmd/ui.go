@@ -91,8 +91,14 @@ func (ui *UI) getTimeToFirstReview(author, prCreatedAt string, isDraft bool, tim
 
 	for _, review := range reviews.Nodes {
 		if review.Author.Login != author {
-			readyForReviewOrPrCreatedAt, _ := time.Parse(time.RFC3339, getReadyForReviewOrPrCreatedAt(prCreatedAt, timelineItems))
-			firstReviewedAt, _ := time.Parse(time.RFC3339, review.CreatedAt)
+			readyForReviewOrPrCreatedAt, err := time.Parse(time.RFC3339, getReadyForReviewOrPrCreatedAt(prCreatedAt, timelineItems))
+			if err != nil {
+				return DefaultEmptyCell
+			}
+			firstReviewedAt, err := time.Parse(time.RFC3339, review.CreatedAt)
+			if err != nil {
+				return DefaultEmptyCell
+			}
 
 			return formatDuration(ui.subtractTime(firstReviewedAt, readyForReviewOrPrCreatedAt), ui.CSVFormat)
 		}
@@ -110,8 +116,14 @@ func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) strin
 		return DefaultEmptyCell
 	}
 
-	prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
-	prFirstCommittedAt, _ := time.Parse(time.RFC3339, commits.Nodes[0].Commit.CommittedDate)
+	prMergedAt, err := time.Parse(time.RFC3339, prMergedAtString)
+	if err != nil {
+		return DefaultEmptyCell
+	}
+	prFirstCommittedAt, err := time.Parse(time.RFC3339, commits.Nodes[0].Commit.CommittedDate)
+	if err != nil {
+		return DefaultEmptyCell
+	}
 
 	return formatDuration(ui.subtractTime(prMergedAt, prFirstCommittedAt), ui.CSVFormat)
 }
@@ -132,12 +144,18 @@ func (ui *UI) getFirstReviewToLastReview(login string, reviews Reviews) string {
 		return DefaultEmptyCell
 	}
 
-	firstReviewedAt, _ := time.Parse(time.RFC3339, nonAuthorReviews[0].CreatedAt)
+	firstReviewedAt, err := time.Parse(time.RFC3339, nonAuthorReviews[0].CreatedAt)
+	if err != nil {
+		return DefaultEmptyCell
+	}
 
 	// Iterate in reverse order to get the last approving review
 	for i := len(nonAuthorReviews) - 1; i >= 0; i-- {
 		if nonAuthorReviews[i].State == ReviewApprovedState {
-			lastReviewedAt, _ := time.Parse(time.RFC3339, nonAuthorReviews[i].CreatedAt)
+			lastReviewedAt, err := time.Parse(time.RFC3339, nonAuthorReviews[i].CreatedAt)
+			if err != nil {
+				return DefaultEmptyCell
+			}
 			return formatDuration(ui.subtractTime(lastReviewedAt, firstReviewedAt), ui.CSVFormat)
 		}
 	}
@@ -152,8 +170,14 @@ func (ui *UI) getFirstReviewToLastReview(login string, reviews Reviews) string {
 func (ui *UI) getFirstApprovalToMerge(author, prMergedAtString string, reviews Reviews) string {
 	for _, review := range reviews.Nodes {
 		if review.Author.Login != author && review.State == ReviewApprovedState {
-			prMergedAt, _ := time.Parse(time.RFC3339, prMergedAtString)
-			firstApprovedAt, _ := time.Parse(time.RFC3339, review.CreatedAt)
+			prMergedAt, err := time.Parse(time.RFC3339, prMergedAtString)
+			if err != nil {
+				return DefaultEmptyCell
+			}
+			firstApprovedAt, err := time.Parse(time.RFC3339, review.CreatedAt)
+			if err != nil {
+				return DefaultEmptyCell
+			}
 
 			return formatDuration(ui.subtractTime(prMergedAt, firstApprovedAt), ui.CSVFormat)
 		}
