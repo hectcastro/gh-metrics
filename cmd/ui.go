@@ -110,7 +110,7 @@ func (ui *UI) getTimeToFirstReview(author, prCreatedAt string, isDraft bool, tim
 // getFeatureLeadTime returns the feature lead time, in hours and minutes,
 // for a given PR.
 //
-//	featureLeadTime = prMergedAt - firstCommitAt
+//	featureLeadTime = prMergedAt - earliestCommitAt
 func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) string {
 	if len(commits.Nodes) == 0 {
 		return DefaultEmptyCell
@@ -120,12 +120,27 @@ func (ui *UI) getFeatureLeadTime(prMergedAtString string, commits Commits) strin
 	if err != nil {
 		return DefaultEmptyCell
 	}
-	prFirstCommittedAt, err := time.Parse(time.RFC3339, commits.Nodes[0].Commit.CommittedDate)
-	if err != nil {
+
+	// Find the earliest commit by date (handles rebases and force pushes)
+	var earliestCommitDate time.Time
+	foundValidCommit := false
+	for _, commitNode := range commits.Nodes {
+		commitDate, err := time.Parse(time.RFC3339, commitNode.Commit.CommittedDate)
+		if err != nil {
+			continue
+		}
+		if !foundValidCommit || commitDate.Before(earliestCommitDate) {
+			earliestCommitDate = commitDate
+			foundValidCommit = true
+		}
+	}
+
+	// If no valid commit dates were found
+	if !foundValidCommit {
 		return DefaultEmptyCell
 	}
 
-	return formatDuration(ui.subtractTime(prMergedAt, prFirstCommittedAt), ui.CSVFormat)
+	return formatDuration(ui.subtractTime(prMergedAt, earliestCommitDate), ui.CSVFormat)
 }
 
 // getFirstReviewToLastReview returns the first review to last approving review time, in

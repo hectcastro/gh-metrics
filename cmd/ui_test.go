@@ -391,6 +391,69 @@ func Test_getFeatureLeadTime_InvalidCommitDate(t *testing.T) {
 	st.Assert(t, ui.getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "--")
 }
 
+func Test_getFeatureLeadTime_MultipleCommits(t *testing.T) {
+	// Test that the earliest commit is found, not just the first in the list
+	// This handles cases like rebases where commits might not be in chronological order
+	var commits = Commits{
+		TotalCount: 3,
+		Nodes: CommitNodes{
+			{Commit{CommittedDate: "2022-03-20T15:11:09Z"}}, // Middle
+			{Commit{CommittedDate: "2022-03-19T10:00:00Z"}}, // Earliest
+			{Commit{CommittedDate: "2022-03-21T08:00:00Z"}}, // Latest
+		},
+	}
+
+	ui := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayAllDays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+
+	// Should calculate from the earliest commit (2022-03-19) to merge time
+	// Merged at 2022-03-22T15:11:09Z, earliest commit at 2022-03-19T10:00:00Z
+	// Difference: ~3 days 5 hours = 77h11m
+	st.Assert(t, ui.getFeatureLeadTime("2022-03-22T15:11:09Z", commits), "77h11m")
+}
+
+func Test_getFeatureLeadTime_MultipleCommitsWithInvalidDate(t *testing.T) {
+	// Test that invalid commit dates are skipped
+	var commits = Commits{
+		TotalCount: 3,
+		Nodes: CommitNodes{
+			{Commit{CommittedDate: "invalid-date"}},
+			{Commit{CommittedDate: "2022-03-20T15:11:09Z"}},
+			{Commit{CommittedDate: "also-invalid"}},
+		},
+	}
+
+	ui := &UI{
+		Calendar: &cal.BusinessCalendar{
+			WorkdayFunc:      WorkdayAllDays,
+			WorkdayStartFunc: WorkdayStart,
+			WorkdayEndFunc:   WorkdayEnd,
+		},
+	}
+
+	// Should use the only valid commit date
+	st.Assert(t, ui.getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "24h0m")
+}
+
+func Test_getFeatureLeadTime_AllInvalidCommitDates(t *testing.T) {
+	// Test that all invalid dates return empty cell
+	var commits = Commits{
+		TotalCount: 2,
+		Nodes: CommitNodes{
+			{Commit{CommittedDate: "invalid-date"}},
+			{Commit{CommittedDate: "also-invalid"}},
+		},
+	}
+
+	ui := &UI{}
+	st.Assert(t, ui.getFeatureLeadTime("2022-03-21T15:11:09Z", commits), "--")
+}
+
 func Test_getFirstReviewToLastReview(t *testing.T) {
 	var reviews = Reviews{
 		Nodes: ReviewNodes{

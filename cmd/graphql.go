@@ -69,8 +69,8 @@ type MetricsGQLQuery struct {
 				MergedAt      string
 				Participants  Participants
 				Comments      Comments
-				Reviews       Reviews       `graphql:"reviews(first: 50, states: [APPROVED, CHANGES_REQUESTED, COMMENTED])"`
-				Commits       Commits       `graphql:"commits(first: 1)"`
+				Reviews       Reviews       `graphql:"reviews(first: 100, states: [APPROVED, CHANGES_REQUESTED, COMMENTED])"`
+				Commits       Commits       `graphql:"commits(first: 100)"`
 				TimelineItems TimelineItems `graphql:"timelineItems(first: 1, itemTypes: [READY_FOR_REVIEW_EVENT])"`
 			} `graphql:"... on PullRequest"`
 		}
