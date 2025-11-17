@@ -30,7 +30,7 @@ require (
 	github.com/cli/safeexec v1.0.1 // indirect
 	github.com/cli/shurcooL-graphql v0.0.4
 	github.com/henvic/httpretty v0.1.0 // indirect
-	github.com/jedib0t/go-pretty/v6 v6.7.1
+	github.com/jedib0t/go-pretty/v6 v6.7.2
 	github.com/spf13/cobra v1.10.1
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
