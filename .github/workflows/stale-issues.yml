@@ -8,4 +8,4 @@ jobs:
   stale:
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/stale@v10.2.0
+      - uses: actions/stale@v10.3.0
