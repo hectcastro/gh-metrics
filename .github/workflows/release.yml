@@ -9,7 +9,7 @@ jobs:
   goreleaser:
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v6
