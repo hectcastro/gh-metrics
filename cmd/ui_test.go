@@ -207,6 +207,13 @@ func Test_getReadyForReviewOrPrCreatedAt_prCreatedAt(t *testing.T) {
 	}) == "2022-03-21T15:11:09Z", true)
 }
 
+func Test_getReadyForReviewOrPrCreatedAt_handlesInconsistentData(t *testing.T) {
+	st.Assert(t, getReadyForReviewOrPrCreatedAt("2022-03-21T15:11:09Z", TimelineItems{
+		TotalCount: 1,
+		Nodes:      TimelineItemNodes{},
+	}) == "2022-03-21T15:11:09Z", true)
+}
+
 func Test_getReadyForReviewOrPrCreatedAt_readyForReviewAt(t *testing.T) {
 	st.Assert(t, getReadyForReviewOrPrCreatedAt("2022-03-21T15:11:09Z", TimelineItems{
 		TotalCount: 1,
