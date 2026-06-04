@@ -71,11 +71,16 @@ func excelCompatDuration(d time.Duration) string {
 // marked ready for review, or its created date (if it was never in
 // a draft state).
 func getReadyForReviewOrPrCreatedAt(prCreated string, timelineItems TimelineItems) string {
-	if timelineItems.TotalCount == 0 {
+	if len(timelineItems.Nodes) == 0 {
 		return prCreated
 	}
 
-	return timelineItems.Nodes[0].ReadyForReviewEvent.CreatedAt
+	readyAt := timelineItems.Nodes[0].ReadyForReviewEvent.CreatedAt
+	if readyAt == "" {
+		return prCreated
+	}
+
+	return readyAt
 }
 
 // getTimeToFirstReview returns the time to first review, in hours and
